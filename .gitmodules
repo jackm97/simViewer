@@ -1,0 +1,9 @@
+[submodule "extern/JFS"]
+	path = extern/JFS
+	url = git@github.com:jackm97/JFS.git
+[submodule "extern/GLR"]
+	path = extern/GLR
+	url = git@github.com:jackm97/GLR.git
+[submodule "extern/imgui"]
+	path = extern/imgui
+	url = https://github.com/ocornut/imgui.git
