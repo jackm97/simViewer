@@ -16,25 +16,53 @@ static void glfw_error_callback(int error, const char* description)
 GLFWwindow* window;
 GLFWwindow* renderWindow;
 
-#include <glr/sceneViewer2D.h>
-
+// Animation window
 void doAnimationWindow();
-void doSourcesMenu();
-void doForcesMenu();
 
 // keeps everything thread safe
-bool isCalcFrame = false; // is true when thread is running to render frame
+bool isCalcFrame = false; // is true when thread is running to calculate frame
 bool isUpdating = false; // is true when thread is running to update fluid or grid
 
 // Grid Variables
-unsigned int N=64;
-float L=1.;
+// NOTE: Only square grids supported right now
+unsigned int N=64; // grid size
+float L=1.; // grid length
+
+// Time step
 float dt=.033;
 
 // fps counter
 float fps = 0;
 
-#include "fluidMenus.h"
+// Animation Flags
+bool isAnimating = false;
+bool nextFrame = false;
+bool isResetting = false;
+
+// Renderers
+#include <glr/sceneViewer2D.h>
+glr::sceneViewer2D renderer2D;
+
+// Solver Stuff
+#include <jfs/JSSFSolver.h>
+
+
+typedef enum {
+    EMPTY,
+    JSSF = 1,
+    JSSFIter = 2
+} SOLVER_TYPE;
+
+static const int numSolvers = 3;
+static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative"};
+SOLVER_TYPE currentSolver = EMPTY;
+bool updateSolver = false;
+
+// fluid solvers
+jfs::JSSFSolver<> JSSFSolver(N,L,jfs::ZERO,dt);
+jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(N,L,jfs::ZERO,dt);
+
+#include "solverMenus.h"
 #include "forcesMenus.h"
 #include "sourcesMenus.h"
 #include "renderFuncs.h"
@@ -95,11 +123,6 @@ int main(int, char**) {
     ImGuiStyle &style = ImGui::GetStyle();
     style.ScaleAllSizes(1.5);
     io.Fonts->AddFontFromFileTTF("../extern/imgui/misc/fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
-
-    // Setup Eigen parallelization
-    Eigen::initParallel();
-    Eigen::setNbThreads(16);
-    std::cout << Eigen::nbThreads() << std::endl;
 
 
     // Main loop

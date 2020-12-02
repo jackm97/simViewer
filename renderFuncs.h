@@ -3,18 +3,7 @@
 
 #include <glr/sceneViewer2D.h>
 
-#include "fluidMenus.h"
-#include "forcesMenus.h"
-#include "sourcesMenus.h"
-
 #include <future>
-
-// Animation Flags
-bool isAnimating = false;
-bool nextFrame = false;
-bool isResetting = false;
-    
-glr::sceneViewer2D renderer2D;
 
 bool JSSFRender(void* imgPtr)
 {
@@ -71,7 +60,6 @@ void renderSims()
         img.resize(N*N*3);
         img.setZero();
         renderer2D.uploadPix2Tex("background", GL_RGB, GL_FLOAT, img.data());
-
         firstCall = false;
     }
 

@@ -2,25 +2,55 @@
 #define FLUIDMENUS_H
 
 #include <imgui/imgui.h>
-#include <jfs/JSSFSolver.h>
 
 #include <future>
 
+// DEV NOTES:
+// General Strucutre for Solver Menus:
+//
+// void doSolverTypeMenu
+// {
+//     setup static vars for solver
+//     static std::future<void> future; // for updating solver properties
+//     static bool isChanged = false; // if solver properties are changed in the menu
 
-typedef enum {
-    EMPTY,
-    JSSF = 1,
-    JSSFIter = 2
-} SOLVER_TYPE;
+//     if (updateSolver && !isCalcFrame) // if solverMenu is telling us to change solver and no frame is being calculated
+//     {
+//         if (!isUpdating) // isUpdating tells us that we are waiting for a future to complete
+//         {
+//             lambdaFunc function to update solverNames
+//             future = std::async(std::launch::async, lambdaFunc);
+//             isUpdating = true;
+//         }
+//         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) ) // future is complete
+//         {
+//             future.get();
+//             isUpdating = false;
+//             updateSolver = false;
+//         }
+//     }
+//     if (updateSolver)
+//     {
+//         ImGui::TextUnformatted("Updating...");
+//         return;
+//     }
 
-static const int numSolvers = 3;
-static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative"};
-SOLVER_TYPE currentSolver = EMPTY;
-bool updateSolver = false;
+//     if (!isUpdating)
+//     {
+//         do menu stuff for solver
+//         make sure to update isChanged if something is changed
+    
 
-// fluid solvers
-jfs::JSSFSolver<> JSSFSolver(N,L,jfs::ZERO,dt);
-jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(N,L,jfs::ZERO,dt);
+//         if (isChanged)
+//             if (ImGui::Button("Update Fluid Properties"))
+//             {
+//                 updateSolver = true;
+//                 isChanged = false;
+//                 return;
+//             }
+        
+//     }
+// }
 
 void doJSSFMenu()
 {
