@@ -45,6 +45,26 @@ bool JSSFIterRender(void* imgPtr)
     return newImage;
 }
 
+bool LBMRender(void* imgPtr)
+{
+    Eigen::VectorXf &img = *((Eigen::VectorXf*) imgPtr);
+    bool newImage = false;
+    if (isResetting)
+    {
+        LBMSolver.resetFluid();
+        isResetting = false;
+        newImage = true;
+    }
+    else if (isAnimating || nextFrame)
+    {
+        LBMSolver.calcNextStep(forces,sources);
+        nextFrame = false;
+        newImage = true;
+    }
+    if (newImage) LBMSolver.getImage(img);
+    return newImage;
+}
+
 void renderSims()
 {
     static float currentTime = 0;
@@ -82,6 +102,11 @@ void renderSims()
                 future = std::async(std::launch::async, JSSFIterRender, (void*) &img);
                 isCalcFrame = true;
             }
+        case LBM:
+            if (!isCalcFrame) {
+                future = std::async(std::launch::async, LBMRender, (void*) &img);
+                isCalcFrame = true;
+            }
         }    
     }
 
@@ -94,6 +119,7 @@ void renderSims()
             break;
         case JSSF:
         case JSSFIter:
+        case LBM:
             if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;

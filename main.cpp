@@ -45,22 +45,25 @@ glr::sceneViewer2D renderer2D;
 
 // Solver Stuff
 #include <jfs/JSSFSolver.h>
+#include <jfs/LBMSolver.h>
 
 
 typedef enum {
-    EMPTY,
+    EMPTY = 0,
     JSSF = 1,
-    JSSFIter = 2
+    JSSFIter = 2,
+    LBM = 3
 } SOLVER_TYPE;
 
-static const int numSolvers = 3;
-static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative"};
+static const int numSolvers = 4;
+static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative", "Lattice Boltzmann"};
 SOLVER_TYPE currentSolver = EMPTY;
 bool updateSolver = false;
 
 // fluid solvers
 jfs::JSSFSolver<> JSSFSolver(N,L,jfs::ZERO,dt);
 jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(N,L,jfs::ZERO,dt);
+jfs::LBMSolver LBMSolver(N,L,1/dt);
 
 #include "solverMenus.h"
 #include "forcesMenus.h"
@@ -124,6 +127,9 @@ int main(int, char**) {
     style.ScaleAllSizes(1.5);
     io.Fonts->AddFontFromFileTTF("../extern/imgui/misc/fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
 
+    // Multi-Threading
+    Eigen::setNbThreads(16);
+    printf("\n%i\n",Eigen::nbThreads());
 
     // Main loop
     while (!glfwWindowShouldClose(window) || isUpdating || isCalcFrame)

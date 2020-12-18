@@ -180,6 +180,70 @@ void doJSSFIterMenu()
     }
 }
 
+void doLBMMenu()
+{
+    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
+    static bool isChanged = false;
+    static const char* bcTypes[2] = {"Zero", "Periodic"};
+    static int currentBC = 0;
+    static std::future<void> future;
+
+    if (updateSolver && !isCalcFrame)
+    {
+        if (!isUpdating)
+        {
+            auto initLambda = [](){LBMSolver.initialize(N,L,1/dt);};
+            future = std::async(std::launch::async, initLambda);
+            isUpdating = true;
+        }
+        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        {
+            future.get();
+            isUpdating = false;
+            updateSolver = false;
+        }
+    }
+    if (updateSolver)
+    {
+        ImGui::TextUnformatted("Updating...");
+        return;
+    }
+
+
+    // if (!isUpdating)
+    // {
+    //     isChanged |= ImGui::InputFloat("Viscosity", &(JSSFSolver.visc));
+    //     isChanged |= ImGui::InputFloat("Diffusion", &(JSSFSolver.diff));
+    //     isChanged |= ImGui::InputFloat("Dissipation", &(JSSFSolver.diss));
+    //     if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
+    //     {
+    //         for (int bc=0; bc < 2; bc++)
+    //         {
+    //             const bool is_selected = (currentBC == bc);
+    //             if (ImGui::Selectable(bcTypes[bc], is_selected))
+    //                 {currentBC = bc; if (bc==0) fluidBound = jfs::ZERO; else fluidBound = jfs::PERIODIC;}
+
+    //             // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+    //             if (is_selected)
+    //             {
+    //                 ImGui::SetItemDefaultFocus();
+    //                 isChanged = true;
+    //             }            
+    //         }
+    //         ImGui::EndCombo();
+    //     }
+    
+
+    //     if (isChanged)
+    //         if (ImGui::Button("Update Fluid Properties"))
+    //         {
+    //             updateSolver = true;
+    //             isChanged = false;
+    //             return;
+    //         }
+    // }
+}
+
 void doSolverMenu()
 {
     static int currentSolverTmp = currentSolver;
@@ -232,6 +296,12 @@ void doSolverMenu()
         {
             doJSSFIterMenu();
             currentSolver = JSSFIter;
+        }
+    case 3:
+        if (!isChanged) 
+        {
+            doLBMMenu();
+            currentSolver = LBM;
         }
     }
 }

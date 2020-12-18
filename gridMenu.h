@@ -26,6 +26,10 @@ void updateSolverGrid()
         diss = JSSFSolverIter.diss;
         JSSFSolverIter.initialize(N,L,JSSFSolverIter.BOUND,dt,visc,diff,diss);
         break;
+    
+    case LBM:
+        LBMSolver.initialize(N,L,1/dt);
+        break;
     }
 }
 
@@ -36,13 +40,14 @@ void updateRenderer()
     renderer2D.deleteTexture("background");
     renderer2D.addTexture(N,N,"background");
     renderer2D.uploadPix2Tex("background", GL_RGB, GL_FLOAT, img.data());
+    renderer2D.changeBounds(L, L);
 }
 
 void doGridMenu()
 {
     static bool isChanged = false;
     static bool updateGrid = false;
-    static float dtTemp = dt;
+    static float dtTemp = dt; //dtTemp is used instead of dt because dt is used outside of just the solvers
     static std::future<void> future;
 
     // update the grid
