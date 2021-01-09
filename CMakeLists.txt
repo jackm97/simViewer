@@ -46,6 +46,3 @@ add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
 add_executable(simViewer main.cpp ${IMGUI_PATH}/imgui.cpp ${IMGUI_PATH}/imgui_draw.cpp ${IMGUI_PATH}/imgui_widgets.cpp ${IMGUI_BACKENDS_PATH}/imgui_impl_glfw.cpp ${IMGUI_BACKENDS_PATH}/imgui_impl_opengl3.cpp)
 target_link_libraries(simViewer PUBLIC pthread jfs glr glad glfw)
-
-find_package(OpenMP REQUIRED)
-target_link_libraries(simViewer PUBLIC -pg  OpenMP::OpenMP_CXX)
