@@ -268,9 +268,31 @@ void doSolverMenu()
             {
                 ImGui::TextUnformatted("Updating...");
                 updateSolver = true;
-                isChanged = false;
                 return;
             }
+    }
+
+    // this section reduces the memory allocation
+    // for unused solvers
+    static std::future<void> future;
+    if (updateSolver && isChanged)
+    {
+        if (!isUpdating)
+        {
+            future = std::async(std::launch::async, minimizeMem);
+            isUpdating = true;
+        }
+        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        {
+            future.get();
+            isUpdating = false;
+            isChanged = false;
+        }
+    }
+    if (isUpdating && isChanged)
+    {
+        ImGui::TextUnformatted("Updating...");
+        return;
     }
 
     switch (currentSolverTmp)
@@ -291,12 +313,14 @@ void doSolverMenu()
             doJSSFIterMenu();
             currentSolver = JSSFIter;
         }
+        break;
     case 3:
         if (!isChanged) 
         {
             doLBMMenu();
             currentSolver = LBM;
         }
+        break;
     }
 }
 
