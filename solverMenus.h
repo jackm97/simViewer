@@ -192,7 +192,7 @@ void doLBMMenu()
     {
         if (!isUpdating)
         {
-            auto initLambda = [](){LBMSolver.initialize(N,L,1/dt);};
+            auto initLambda = [](){LBMSolver.initialize(N,L,1/dt,LBMSolver.rho0,LBMSolver.visc,LBMSolver.us);};
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }
@@ -210,38 +210,32 @@ void doLBMMenu()
     }
 
 
-    // if (!isUpdating)
-    // {
-    //     isChanged |= ImGui::InputFloat("Viscosity", &(JSSFSolver.visc));
-    //     isChanged |= ImGui::InputFloat("Diffusion", &(JSSFSolver.diff));
-    //     isChanged |= ImGui::InputFloat("Dissipation", &(JSSFSolver.diss));
-    //     if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
-    //     {
-    //         for (int bc=0; bc < 2; bc++)
-    //         {
-    //             const bool is_selected = (currentBC == bc);
-    //             if (ImGui::Selectable(bcTypes[bc], is_selected))
-    //                 {currentBC = bc; if (bc==0) fluidBound = jfs::ZERO; else fluidBound = jfs::PERIODIC;}
-
-    //             // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-    //             if (is_selected)
-    //             {
-    //                 ImGui::SetItemDefaultFocus();
-    //                 isChanged = true;
-    //             }            
-    //         }
-    //         ImGui::EndCombo();
-    //     }
+    if (!isUpdating)
+    {
+        isChanged |= ImGui::InputFloat("Density", &(LBMSolver.rho0));
+        isChanged |= ImGui::InputFloat("Viscosity", &(LBMSolver.visc),0,0,"%.0e");
+        isChanged |= ImGui::InputFloat("Speed of Sound", &(LBMSolver.us));
     
 
-    //     if (isChanged)
-    //         if (ImGui::Button("Update Fluid Properties"))
-    //         {
-    //             updateSolver = true;
-    //             isChanged = false;
-    //             return;
-    //         }
-    // }
+        if (isChanged)
+            if (ImGui::Button("Update Fluid Properties"))
+            {
+                updateSolver = true;
+                isChanged = false;
+                return;
+            }
+    }
+}
+
+void minimizeMem()
+{
+    if (updateSolver)
+    {
+        JSSFSolver.initialize(1,L,jfs::ZERO,dt);
+        JSSFSolverIter.initialize(1,L,jfs::ZERO,dt);
+        LBMSolver.initialize(1,L,1/dt);
+        updateSolver = true;
+    }
 }
 
 void doSolverMenu()
