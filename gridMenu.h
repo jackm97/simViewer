@@ -28,7 +28,7 @@ void updateSolverGrid()
         break;
     
     case LBM:
-        LBMSolver.initialize(N,L,1/dt);
+        LBMSolver.initialize(N,L,1/dt,LBMSolver.rho0,LBMSolver.visc,LBMSolver.us);
         break;
     }
 }
