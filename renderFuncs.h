@@ -17,9 +17,11 @@ bool JSSFRender(void* imgPtr)
     }
     else if (isAnimating || nextFrame)
     {
-        JSSFSolver.calcNextStep(forces,sources);
-        nextFrame = false;
-        newImage = true;
+        if ( !(failedStep = JSSFSolver.calcNextStep(forces,sources)) )
+        {
+            nextFrame = false;
+            newImage = true;
+        }
     }
     if (newImage) JSSFSolver.getImage(img);
     return newImage;
@@ -37,9 +39,11 @@ bool JSSFIterRender(void* imgPtr)
     }
     else if (isAnimating || nextFrame)
     {
-        JSSFSolverIter.calcNextStep(forces,sources);
-        nextFrame = false;
-        newImage = true;
+        if ( !(failedStep = JSSFSolverIter.calcNextStep(forces,sources)) )
+        {
+            nextFrame = false;
+            newImage = true;
+        }
     }
     if (newImage) JSSFSolverIter.getImage(img);
     return newImage;
@@ -57,9 +61,11 @@ bool LBMRender(void* imgPtr)
     }
     else if (isAnimating || nextFrame)
     {
-        LBMSolver.calcNextStep(forces,sources);
-        nextFrame = false;
-        newImage = true;
+        if ( !(failedStep = LBMSolver.calcNextStep(forces,sources)) )
+        {
+            nextFrame = false;
+            newImage = true;
+        }
     }
     if (newImage) LBMSolver.getImage(img);
     return newImage;

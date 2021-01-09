@@ -188,8 +188,26 @@ int main(int, char**) {
 void doAnimationWindow()
 {
     static bool checkDone = false;
+    static bool acknowledgeFailedStep = false;
     if (ImGui::Begin("Animation"))
     {
+
+        // terminate animation if step failed
+        if (failedStep && (isAnimating || nextFrame || acknowledgeFailedStep))
+        {
+            acknowledgeFailedStep = true;
+            isAnimating = false;
+            nextFrame = false;
+            checkDone = false;
+            ImGui::Text("Failed frame!");
+            if (ImGui::Button("OK")){
+                failedStep = false;
+                acknowledgeFailedStep = false;
+                isResetting = true;
+            }
+            ImGui::End();
+            return;
+        }
         
         if (isUpdating)
         {
@@ -203,7 +221,7 @@ void doAnimationWindow()
             ImGui::End();
             return;
         }
-        else
+        else if (checkDone)
         {
             checkDone = false;
         }
