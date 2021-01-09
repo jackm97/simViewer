@@ -13,7 +13,7 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-GLFWwindow* window;
+GLFWwindow* menuWindow;
 GLFWwindow* renderWindow;
 
 // Animation window
@@ -21,7 +21,7 @@ void doAnimationWindow();
 
 // keeps everything thread safe
 bool isCalcFrame = false; // is true when thread is running to calculate frame
-bool isUpdating = false; // is true when thread is running to update fluid or grid
+bool isUpdating = false; // is true when thread is running to update solver or grid
 
 // Grid Variables
 // NOTE: Only square grids supported right now
@@ -38,6 +38,7 @@ float fps = 0;
 bool isAnimating = false;
 bool nextFrame = false;
 bool isResetting = false;
+bool failedStep = false;
 
 // Renderers
 #include <glr/sceneViewer2D.h>
@@ -61,9 +62,9 @@ SOLVER_TYPE currentSolver = EMPTY;
 bool updateSolver = false;
 
 // fluid solvers
-jfs::JSSFSolver<> JSSFSolver(N,L,jfs::ZERO,dt);
-jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(N,L,jfs::ZERO,dt);
-jfs::LBMSolver LBMSolver(N,L,1/dt);
+jfs::JSSFSolver<> JSSFSolver(1,L,jfs::ZERO,dt);
+jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(1,L,jfs::ZERO,dt);
+jfs::LBMSolver LBMSolver(1,L,1/dt);
 
 #include "solverMenus.h"
 #include "forcesMenus.h"
@@ -97,10 +98,14 @@ int main(int, char**) {
 #endif
 
     // Create window with graphics context
-    window = glfwCreateWindow(1280, 720, "simViewer!", NULL, NULL);
-    if (window == NULL)
+    menuWindow = glfwCreateWindow(1280, 720, "simViewer!", NULL, NULL);
+    if (menuWindow == NULL)
         return 1;
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(menuWindow);
+
+    renderWindow = glfwCreateWindow(1280, 720, "Output Window", NULL, NULL);
+    if (renderWindow == NULL)
+        return 1;
 
     // Initialize OpenGL loader
     bool err = gladLoadGL() == 0;
@@ -119,7 +124,7 @@ int main(int, char**) {
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(menuWindow, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // High-DPI
@@ -127,12 +132,8 @@ int main(int, char**) {
     style.ScaleAllSizes(1.5);
     io.Fonts->AddFontFromFileTTF("../extern/imgui/misc/fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
 
-    // Multi-Threading
-    Eigen::setNbThreads(16);
-    printf("\n%i\n",Eigen::nbThreads());
-
     // Main loop
-    while (!glfwWindowShouldClose(window) || isUpdating || isCalcFrame)
+    while (!(glfwWindowShouldClose(menuWindow) || glfwWindowShouldClose(renderWindow)) || isUpdating || isCalcFrame)
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -151,25 +152,33 @@ int main(int, char**) {
         doForceWindow();
         doSourceWindow();
 
-        // Rendering
-        glfwMakeContextCurrent(window);
-        ImGui::Render();
-        
-        // viewport stuff
-        int viewPortSize;
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
-        viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
-        glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
+        // UI Stuff
+        glfwMakeContextCurrent(menuWindow);
+        ImGui::Render();    
         
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        renderSims();
-        
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(menuWindow);
+        
+        // Render Stuff
+        glfwMakeContextCurrent(renderWindow);
+        
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        // viewport stuff
+        int viewPortSize;
+        int display_w, display_h;
+        glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
+        viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
+        glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
+        
+        renderSims();
+        
+        glfwSwapBuffers(renderWindow);
     }
 
     // Cleanup
@@ -177,7 +186,8 @@ int main(int, char**) {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(menuWindow);
+    glfwDestroyWindow(renderWindow);
     glfwTerminate();
 
     return 0;
