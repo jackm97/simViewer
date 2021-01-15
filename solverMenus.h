@@ -182,17 +182,68 @@ void doJSSFIterMenu()
 
 void doLBMMenu()
 {
-    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
     static bool isChanged = false;
     static const char* bcTypes[2] = {"Zero", "Periodic"};
     static int currentBC = 0;
     static std::future<void> future;
 
+    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
+    static float rho0 = LBMSolver.rho0, visc = LBMSolver.visc, us = LBMSolver.us;
+
     if (updateSolver && !isCalcFrame)
     {
         if (!isUpdating)
         {
-            auto initLambda = [](){LBMSolver.initialize(N,L,1/dt,LBMSolver.rho0,LBMSolver.visc,LBMSolver.us);};
+            auto initLambda = [](){LBMSolver.initialize(N,L,1/dt,rho0,visc,us);};
+            future = std::async(std::launch::async, initLambda);
+            isUpdating = true;
+        }
+        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        {
+            future.get();
+            isUpdating = false;
+            updateSolver = false;
+        }
+    }
+    if (updateSolver)
+    {
+        ImGui::TextUnformatted("Updating...");
+        return;
+    }
+
+
+    if (!isUpdating)
+    {
+        isChanged |= ImGui::InputFloat("Density", &(rho0));
+        isChanged |= ImGui::InputFloat("Viscosity", &(visc),0,0,"%.0e");
+        isChanged |= ImGui::InputFloat("Speed of Sound", &(us));
+    
+
+        if (isChanged)
+            if (ImGui::Button("Update Fluid Properties"))
+            {
+                updateSolver = true;
+                isChanged = false;
+                return;
+            }
+    }
+}
+
+void doJSSF3DMenu()
+{
+    static bool isChanged = false;
+    static const char* bcTypes[2] = {"Zero", "Periodic"};
+    static int currentBC = 0;
+    static std::future<void> future;
+
+    static float visc = JSSFSolver3D.visc, diff = JSSFSolver3D.diff, diss = JSSFSolver3D.diss;
+    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
+
+    if (updateSolver && !isCalcFrame)
+    {
+        if (!isUpdating)
+        {
+            auto initLambda = [](){JSSFSolver3D.initialize(N,L,fluidBound,dt,visc,diff,diss);};
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }
