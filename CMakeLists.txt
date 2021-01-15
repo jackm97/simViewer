@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.13.0)
 project(simViewer VERSION 0.1.0)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #########################LIBGLR########################
 # SET SOME OPTIONS FOR LIBGLR
@@ -42,7 +45,20 @@ include_directories(${PROJECT_SOURCE_DIR}/extern)
 set(IMGUI_PATH ${PROJECT_SOURCE_DIR}/extern/imgui)
 set(IMGUI_BACKENDS_PATH ${IMGUI_PATH}/backends)
 include_directories(${IMGUI_PATH})
+set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
+                ${IMGUI_PATH}/imgui_draw.cpp 
+                ${IMGUI_PATH}/imgui_widgets.cpp 
+                ${IMGUI_PATH}/imgui_tables.cpp
+                ${IMGUI_BACKENDS_PATH}/imgui_impl_glfw.cpp 
+                ${IMGUI_BACKENDS_PATH}/imgui_impl_opengl3.cpp 
+                ${PROJECT_SOURCE_DIR}/extern/ImGuiFileDialog/ImGuiFileDialog.cpp)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-add_executable(simViewer main.cpp ${IMGUI_PATH}/imgui.cpp ${IMGUI_PATH}/imgui_draw.cpp ${IMGUI_PATH}/imgui_widgets.cpp ${IMGUI_BACKENDS_PATH}/imgui_impl_glfw.cpp ${IMGUI_BACKENDS_PATH}/imgui_impl_opengl3.cpp)
+add_executable(simViewer main.cpp ${IMGUI_SRC})
 target_link_libraries(simViewer PUBLIC pthread jfs glr glad glfw)
+
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    add_definitions(-DUSE_OPENMP)
+    target_link_libraries(jfs PUBLIC OpenMP::OpenMP_CXX)
+endif()
