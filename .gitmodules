@@ -10,6 +10,3 @@
 [submodule "extern/stb"]
 	path = extern/stb
 	url = https://github.com/nothings/stb.git
-[submodule "extern/imgui-filebrowser"]
-	path = extern/imgui-filebrowser
-	url = https://github.com/AirGuanZ/imgui-filebrowser.git
