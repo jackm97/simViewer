@@ -4,15 +4,17 @@
 #include <imgui/imgui.h>
 #include <vector>
 #include <string>
-std::vector<jfs::Force> forces;
 
 
 void doForceWindow()
 {
     static std::vector<std::string> forceList = {""};
     static int currentForce = 0;
-    static float pos[2];
-    static float force[2];
+    static float pos[3];
+    static float force[3];
+
+    if (currentRenderer == NONE)
+        return;
 
     if (ImGui::Begin("Forces"))
     {
@@ -37,13 +39,31 @@ void doForceWindow()
             force[0] = forces[currentForce - 1].Fx;
             force[1] = forces[currentForce - 1].Fy;
 
-            if (ImGui::InputFloat2("Position", pos)){
-                forces[currentForce - 1].x = pos[0];
-                forces[currentForce - 1].y = pos[1];
+            if (currentRenderer == DIM2)
+            {
+                if (ImGui::InputFloat2("Position", pos)){
+                    forces[currentForce - 1].x = pos[0];
+                    forces[currentForce - 1].y = pos[1];
+                    forces[currentForce - 1].z = 0;
+                }
+                if (ImGui::InputFloat2("Force", force)){
+                    forces[currentForce - 1].Fx = force[0];
+                    forces[currentForce - 1].Fy = force[1];
+                    forces[currentForce - 1].Fz = 0;
+                }
             }
-            if (ImGui::InputFloat2("Force", force)){
-                forces[currentForce - 1].Fx = force[0];
-                forces[currentForce - 1].Fy = force[1];
+            else if (currentRenderer == DIM3)
+            {
+                if (ImGui::InputFloat3("Position", pos)){
+                    forces[currentForce - 1].x = pos[0];
+                    forces[currentForce - 1].y = pos[1];
+                    forces[currentForce - 1].z = pos[2];
+                }
+                if (ImGui::InputFloat3("Force", force)){
+                    forces[currentForce - 1].Fx = force[0];
+                    forces[currentForce - 1].Fy = force[1];
+                    forces[currentForce - 1].Fz = force[2];
+                }
             }
         }
         if (ImGui::Button("Add Force"))

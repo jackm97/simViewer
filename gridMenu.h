@@ -8,6 +8,8 @@ void updateSolverGrid()
     float visc;
     float diff;
     float diss;
+    float rho0;
+    float us;
     switch (currentSolver)
     {
     case EMPTY:
@@ -28,19 +30,19 @@ void updateSolverGrid()
         break;
     
     case LBM:
-        LBMSolver.initialize(N,L,1/dt,LBMSolver.rho0,LBMSolver.visc,LBMSolver.us);
+        rho0 = LBMSolver.rho0;
+        visc = LBMSolver.visc;
+        us = LBMSolver.us;
+        LBMSolver.initialize(N,L,1/dt,rho0,visc,us);
+        break;
+    
+    case JSSF3D:
+        visc = JSSFSolver.visc;
+        diff = JSSFSolver.diff;
+        diss = JSSFSolver.diss;
+        JSSFSolver3D.initialize(N,L,JSSFSolver.BOUND,dt,visc,diff,diss);
         break;
     }
-}
-
-void updateRenderer()
-{
-    Eigen::VectorXf img(N*N*3);
-    img.setZero();
-    renderer2D.deleteTexture("background");
-    renderer2D.addTexture(N,N,"background");
-    renderer2D.uploadPix2Tex("background", GL_RGB, GL_FLOAT, img.data());
-    renderer2D.changeBounds(L, L);
 }
 
 void doGridMenu()
@@ -92,8 +94,30 @@ void doGridMenu()
             }
     }
 
-    // do fluid menu (eventually this will
-    // be called do solver menu)
+    // do multi-threading menu
+    #ifdef USE_OPENMP
+    static int num_threads = Eigen::nbThreads();
+    static bool changeThreads = false;
+    if (!isUpdating && !isChanged && ImGui::TreeNode("Multi-threading"))
+    {
+        if(ImGui::InputInt("Number of Threads", &num_threads))
+            changeThreads = true;
+        if(!isUpdating && !isAnimating && !nextFrame)
+        {
+            if (changeThreads && ImGui::Button("Update Threads"))
+            {
+                Eigen::setNbThreads(num_threads);
+                changeThreads = false;
+            }
+        }
+        std::string thread_info = "Current Eigen Threads: ";
+        thread_info +=  std::to_string(Eigen::nbThreads());
+        ImGui::TextUnformatted(thread_info.c_str());
+        ImGui::TreePop();
+    }
+    #endif
+
+    // do solver menu
     if (!isChanged && ImGui::TreeNode("Solver"))
     {
         doSolverMenu();

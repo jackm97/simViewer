@@ -5,16 +5,18 @@
 #include <imgui/imgui.h>
 #include <vector>
 #include <string>
-std::vector<jfs::Source> sources;
 
 
 void doSourceWindow()
 {
     static std::vector<std::string> sourceList = {""};
     static int currentSource = 0;
-    static float pos[2];
+    static float pos[3];
     static float color[3];
     static float strength;
+
+    if (currentRenderer == NONE)
+        return;
 
     if (ImGui::Begin("Sources"))
     {
@@ -41,9 +43,21 @@ void doSourceWindow()
             color[2] = sources[currentSource - 1].color(2);
             strength = sources[currentSource - 1].strength;
 
-            if (ImGui::InputFloat2("Position", pos)){
-                sources[currentSource - 1].x = pos[0];
-                sources[currentSource - 1].y = pos[1];
+            if (currentRenderer == DIM2)
+            {
+                if (ImGui::InputFloat2("Position", pos)){
+                    sources[currentSource - 1].x = pos[0];
+                    sources[currentSource - 1].y = pos[1];
+                    sources[currentSource - 1].z = 0;
+                }
+            }
+            else if (currentRenderer == DIM3)
+            {
+                if (ImGui::InputFloat3("Position", pos)){
+                    sources[currentSource - 1].x = pos[0];
+                    sources[currentSource - 1].y = pos[1];
+                    sources[currentSource - 1].z = pos[2];
+                }
             }
             if (ImGui::ColorEdit3("Color", color)){
                 sources[currentSource - 1].color(0) = color[0];

@@ -16,9 +16,6 @@ static void glfw_error_callback(int error, const char* description)
 GLFWwindow* menuWindow;
 GLFWwindow* renderWindow;
 
-// Animation window
-void doAnimationWindow();
-
 // keeps everything thread safe
 bool isCalcFrame = false; // is true when thread is running to calculate frame
 bool isUpdating = false; // is true when thread is running to update solver or grid
@@ -34,6 +31,10 @@ float dt=.033;
 // fps counter
 float fps = 0;
 
+// sim results
+#include <Eigen/Eigen>
+Eigen::VectorXf img;
+
 // Animation Flags
 bool isAnimating = false;
 bool nextFrame = false;
@@ -43,33 +44,53 @@ bool failedStep = false;
 // Renderers
 #include <glr/sceneViewer2D.h>
 glr::sceneViewer2D renderer2D;
+#include <glr/sceneViewer.h>
+glr::sceneViewer renderer3D;
+
+typedef enum {
+    NONE,
+    DIM2,
+    DIM3
+} RENDER_TYPE;
+
+RENDER_TYPE currentRenderer = NONE;
 
 // Solver Stuff
 #include <jfs/JSSFSolver.h>
+#include <jfs/JSSFSolver3D.h>
 #include <jfs/LBMSolver.h>
-
 
 typedef enum {
     EMPTY = 0,
     JSSF = 1,
     JSSFIter = 2,
-    LBM = 3
+    LBM = 3,
+    JSSF3D = 4
 } SOLVER_TYPE;
 
-static const int numSolvers = 4;
-static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative", "Lattice Boltzmann"};
+static const int numSolvers = 5;
+static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative", "Lattice Boltzmann", "JSSF3D"};
 SOLVER_TYPE currentSolver = EMPTY;
 bool updateSolver = false;
 
 // fluid solvers
+//      2D
 jfs::JSSFSolver<> JSSFSolver(1,L,jfs::ZERO,dt);
 jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(1,L,jfs::ZERO,dt);
 jfs::LBMSolver LBMSolver(1,L,1/dt);
+//      3D
+jfs::JSSFSolver3D<jfs::iterativeSolver> JSSFSolver3D(1,L,jfs::ZERO,dt);
 
+
+// Sources, Forces and Points
+std::vector<jfs::Force> forces;
+std::vector<jfs::Source> sources;
+
+#include "renderFuncs.h"
+#include "animationMenu.h"
 #include "solverMenus.h"
 #include "forcesMenus.h"
 #include "sourcesMenus.h"
-#include "renderFuncs.h"
 #include "gridMenu.h"
 
 int main(int, char**) {
@@ -103,7 +124,7 @@ int main(int, char**) {
         return 1;
     glfwMakeContextCurrent(menuWindow);
 
-    renderWindow = glfwCreateWindow(1280, 720, "Output Window", NULL, NULL);
+    renderWindow = glfwCreateWindow(480, 480, "Output Window", NULL, NULL);
     if (renderWindow == NULL)
         return 1;
 
@@ -191,61 +212,4 @@ int main(int, char**) {
     glfwTerminate();
 
     return 0;
-}
-
-#include <string>
-
-void doAnimationWindow()
-{
-    static bool checkDone = false;
-    static bool acknowledgeFailedStep = false;
-    if (ImGui::Begin("Animation"))
-    {
-
-        // terminate animation if step failed
-        if (failedStep && (isAnimating || nextFrame || acknowledgeFailedStep))
-        {
-            acknowledgeFailedStep = true;
-            isAnimating = false;
-            nextFrame = false;
-            checkDone = false;
-            ImGui::Text("Failed frame!");
-            if (ImGui::Button("OK")){
-                failedStep = false;
-                acknowledgeFailedStep = false;
-                isResetting = true;
-            }
-            ImGui::End();
-            return;
-        }
-        
-        if (isUpdating)
-        {
-            ImGui::Text("Updating...");
-            ImGui::End();
-            return;
-        }
-        else if (checkDone && isCalcFrame)
-        {
-            ImGui::Text("Finishing frame...");
-            ImGui::End();
-            return;
-        }
-        else if (checkDone)
-        {
-            checkDone = false;
-        }
-        
-
-        if (!isAnimating && ImGui::Button("Animate")) isAnimating=true;
-        
-        else if (isAnimating && (checkDone = ImGui::Button("Stop"))) isAnimating=false;
-
-        if (!checkDone && !isAnimating && (checkDone = ImGui::Button("Next Frame"))) nextFrame=true;
-        
-        if (!checkDone && (checkDone = ImGui::Button("Reset"))) isResetting = true;
-
-        ImGui::TextUnformatted(("FPS: " + std::to_string(std::round(fps*1000)/1000.)).c_str());
-    }
-    ImGui::End();
 }
