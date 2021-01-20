@@ -125,7 +125,12 @@ bool clearCache(std::string cache_loc)
     ImGui::TextUnformatted("Clear Cache?");
     if (ImGui::Button("OK"))
     {
+        #ifdef WIN32
+        std::vector<std::wstring> files;
+        #endif
+        #ifdef UNIX
         std::vector<std::string> files;
+        #endif
         for(auto& p: fs::directory_iterator(cache_loc.c_str()))
             files.push_back(p.path());
 

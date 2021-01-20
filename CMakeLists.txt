@@ -4,9 +4,11 @@ project(simViewer VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(glfw3 3.3 REQUIRED)
-
 include_directories(${PROJECT_SOURCE_DIR}/extern)
+
+#########################GLFW########################
+find_package(glfw3 3.3 REQUIRED)
+#########################GLFW########################
 
 #########################LIBGLR########################
 # SET SOME OPTIONS FOR LIBGLR
@@ -54,20 +56,36 @@ set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
                 ${IMGUI_BACKENDS_PATH}/imgui_impl_opengl3.cpp 
                 ${PROJECT_SOURCE_DIR}/extern/ImGuiFileDialog/ImGuiFileDialog.cpp)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
-
-add_library(imgui ${IMGUI_SRC})
 #########################IMGUI##########################
 
 #########################OPENVDB########################
 # SET SOME OPTIONS FOR OPENVDB
-#   OPENVDB PATH
-set(PATH_TO_OPENVDB ${PROJECT_SOURCE_DIR}/extern/openvdb/)
+#   OPENVDB INSTALL PATH
+if (WIN32)
+    set(OPENVDB_INSTALL_PATH "C:/Program Files/OpenVDB")
+elseif(UNIX)
+    set(OPENVDB_INSTALL_PATH "/usr/local/")
+endif()
+list(APPEND CMAKE_MODULE_PATH "${OPENVDB_INSTALL_PATH}/lib/cmake/OpenVDB")
 
-add_subdirectory(${PATH_TO_OPENVDB})
+if (WIN32)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    file(COPY "${OPENVDB_INSTALL_PATH}/bin/openvdb.dll" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+endif()
+
+find_package(OpenVDB REQUIRED)
 #########################OPENVDB########################
 
-add_executable(simViewer main.cpp)
-target_link_libraries(simViewer PUBLIC pthread jfs glr glad glfw imgui openvdb)
+#########################THREADS########################
+if (WIN32)
+    find_package (Threads REQUIRED)
+elseif(UNIX)
+    set(THREADS_LIB pthreads)
+endif()
+#########################THREADS########################
+
+add_executable(simViewer main.cpp ${IMGUI_SRC})
+target_link_libraries(simViewer PUBLIC ${THREADS_LIB} jfs glr glad glfw OpenVDB::openvdb)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)

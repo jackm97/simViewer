@@ -39,3 +39,6 @@ build/
 
 #Cache
 .cache/
+
+#VisualStudio
+.vs/
