@@ -13,6 +13,3 @@
 [submodule "extern/ImGuiFileDialog"]
 	path = extern/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog.git
-[submodule "extern/openvdb"]
-	path = extern/openvdb
-	url = https://github.com/AcademySoftwareFoundation/openvdb.git
