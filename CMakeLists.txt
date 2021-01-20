@@ -77,15 +77,18 @@ find_package(OpenVDB REQUIRED)
 #########################OPENVDB########################
 
 #########################THREADS########################
-if (WIN32)
-    find_package (Threads REQUIRED)
-elseif(UNIX)
-    set(THREADS_LIB pthreads)
-endif()
+find_package (Threads REQUIRED)
 #########################THREADS########################
 
+set(SIMVIEWER_LIBS  ${THREADS_LIB}
+                    jfs
+                    glr
+                    glad
+                    glfw
+                    OpenVDB::openvdb)
+
 add_executable(simViewer main.cpp ${IMGUI_SRC})
-target_link_libraries(simViewer PUBLIC ${THREADS_LIB} jfs glr glad glfw OpenVDB::openvdb)
+target_link_libraries(simViewer PUBLIC ${SIMVIEWER_LIBS})
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
