@@ -4,6 +4,10 @@ project(simViewer VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(glfw3 3.3 REQUIRED)
+
+include_directories(${PROJECT_SOURCE_DIR}/extern)
+
 #########################LIBGLR########################
 # SET SOME OPTIONS FOR LIBGLR
 #   GLR PATH
@@ -38,10 +42,7 @@ include_directories(${PATH_TO_JFS}
                     ${EIGEN_PATH})
 #########################LIBJFS########################
 
-find_package(glfw3 3.3 REQUIRED)
-
-include_directories(${PROJECT_SOURCE_DIR}/extern)
-
+#########################IMGUI##########################
 set(IMGUI_PATH ${PROJECT_SOURCE_DIR}/extern/imgui)
 set(IMGUI_BACKENDS_PATH ${IMGUI_PATH}/backends)
 include_directories(${IMGUI_PATH})
@@ -54,8 +55,19 @@ set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
                 ${PROJECT_SOURCE_DIR}/extern/ImGuiFileDialog/ImGuiFileDialog.cpp)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-add_executable(simViewer main.cpp ${IMGUI_SRC})
-target_link_libraries(simViewer PUBLIC pthread jfs glr glad glfw)
+add_library(imgui ${IMGUI_SRC})
+#########################IMGUI##########################
+
+#########################OPENVDB########################
+# SET SOME OPTIONS FOR OPENVDB
+#   OPENVDB PATH
+set(PATH_TO_OPENVDB ${PROJECT_SOURCE_DIR}/extern/openvdb/)
+
+add_subdirectory(${PATH_TO_OPENVDB})
+#########################OPENVDB########################
+
+add_executable(simViewer main.cpp)
+target_link_libraries(simViewer PUBLIC pthread jfs glr glad glfw imgui openvdb)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)

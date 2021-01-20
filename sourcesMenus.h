@@ -38,6 +38,7 @@ void doSourceWindow()
         {
             pos[0] = sources[currentSource - 1].x;
             pos[1] = sources[currentSource - 1].y;
+            pos[2] = sources[currentSource - 1].z;
             color[0] = sources[currentSource - 1].color(0);
             color[1] = sources[currentSource - 1].color(1);
             color[2] = sources[currentSource - 1].color(2);

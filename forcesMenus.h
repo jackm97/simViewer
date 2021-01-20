@@ -36,8 +36,10 @@ void doForceWindow()
         {
             pos[0] = forces[currentForce - 1].x;
             pos[1] = forces[currentForce - 1].y;
+            pos[2] = forces[currentForce - 1].z;
             force[0] = forces[currentForce - 1].Fx;
             force[1] = forces[currentForce - 1].Fy;
+            force[2] = forces[currentForce - 1].Fz;
 
             if (currentRenderer == DIM2)
             {
