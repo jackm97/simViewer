@@ -42,3 +42,6 @@ build/
 
 #VisualStudio
 .vs/
+
+#imgui init files
+imgui.ini
