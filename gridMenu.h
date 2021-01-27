@@ -3,47 +3,47 @@
 
 #include <imgui/imgui.h>
 
-void updateSolverGrid()
-{
-    float visc;
-    float diff;
-    float diss;
-    float rho0;
-    float us;
-    switch (currentSolver)
-    {
-    case EMPTY:
-        break;
+// void updateSolverGrid()
+// {
+//     float visc;
+//     float diff;
+//     float diss;
+//     float rho0;
+//     float us;
+//     switch (currentSolver)
+//     {
+//     case EMPTY:
+//         break;
     
-    case JSSF:
-        visc = JSSFSolver.visc;
-        diff = JSSFSolver.diff;
-        diss = JSSFSolver.diss;
-        JSSFSolver.initialize(N,L,JSSFSolver.BOUND,dt,visc,diff,diss);
-        break;
+//     case JSSF:
+//         visc = JSSFSolver->visc;
+//         diff = JSSFSolver->diff;
+//         diss = JSSFSolver->diss;
+//         JSSFSolver->initialize(N,L,JSSFSolver->BOUND,dt,visc,diff,diss);
+//         break;
     
-    case JSSFIter:
-        visc = JSSFSolverIter.visc;
-        diff = JSSFSolverIter.diff;
-        diss = JSSFSolverIter.diss;
-        JSSFSolverIter.initialize(N,L,JSSFSolverIter.BOUND,dt,visc,diff,diss);
-        break;
+//     case JSSFIter:
+//         visc = JSSFSolverIter->visc;
+//         diff = JSSFSolverIter->diff;
+//         diss = JSSFSolverIter->diss;
+//         JSSFSolverIter->initialize(N,L,JSSFSolverIter->BOUND,dt,visc,diff,diss);
+//         break;
     
-    case LBM:
-        rho0 = LBMSolver.rho0;
-        visc = LBMSolver.visc;
-        us = LBMSolver.us;
-        LBMSolver.initialize(N,L,1/dt,rho0,visc,us);
-        break;
+//     case LBM:
+//         rho0 = LBMSolver->rho0;
+//         visc = LBMSolver->visc;
+//         us = LBMSolver->us;
+//         LBMSolver->initialize(N,L,1/dt,rho0,visc,us);
+//         break;
     
-    case JSSF3D:
-        visc = JSSFSolver.visc;
-        diff = JSSFSolver.diff;
-        diss = JSSFSolver.diss;
-        JSSFSolver3D.initialize(N,L,JSSFSolver.BOUND,dt,visc,diff,diss);
-        break;
-    }
-}
+//     case JSSF3D:
+//         visc = JSSFSolver3D->visc;
+//         diff = JSSFSolver3D->diff;
+//         diss = JSSFSolver3D->diss;
+//         JSSFSolver3D->initialize(N,L,JSSFSolver.BOUND,dt,visc,diff,diss);
+//         break;
+//     }
+// }
 
 void doGridMenu()
 {
@@ -55,25 +55,15 @@ void doGridMenu()
     // update the grid
     if (updateGrid && !isCalcFrame)
     {
-        if (!isUpdating)
-        {
-            dt = dtTemp;
-            future = std::async(std::launch::async, updateSolverGrid);
-            isUpdating = true;
-        }
-        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
-        {
-            future.get();
-            updateRenderer();
-            isUpdating = false;
-            updateGrid = false;
-        }
+        dt = dtTemp;
+        updateSolver = true;
+        updateGrid = false;
     }
-    if (updateGrid)
-    {
-        ImGui::TextUnformatted("Updating...");
-        return;
-    }
+    // if (updateGrid)
+    // {
+    //     ImGui::TextUnformatted("Updating...");
+    //     return;
+    // }
 
     // we don't want to be able to change anything when any of the other
     // parts of the program are updating

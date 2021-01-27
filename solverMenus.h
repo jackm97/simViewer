@@ -59,14 +59,14 @@ void doJSSFMenu()
     static int currentBC = 0;
     static std::future<void> future;
 
-    static float visc = JSSFSolver.visc, diff = JSSFSolver.diff, diss = JSSFSolver.diss;
+    static float visc = 0, diff = 0, diss = 0;
     static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
 
     if (updateSolver && !isCalcFrame)
     {
         if (!isUpdating)
         {
-            auto initLambda = [](){JSSFSolver.initialize(N,L,fluidBound,dt,visc,diff,diss);};
+            auto initLambda = [](){JSSFSolver->initialize(N,L,fluidBound,dt,visc,diff,diss);};
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }
@@ -126,128 +126,13 @@ void doJSSFIterMenu()
     static std::future<void> future;
 
     static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
-    static float visc = JSSFSolverIter.visc, diff = JSSFSolverIter.diff, diss = JSSFSolverIter.diss;
+    static float visc = 0, diff = 0, diss = 0;
 
     if (updateSolver && !isCalcFrame)
     {
         if (!isUpdating)
         {
-            auto initLambda = [](){JSSFSolverIter.initialize(N,L,fluidBound,dt,visc,diff,diss);};
-            future = std::async(std::launch::async, initLambda);
-            isUpdating = true;
-        }
-        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
-        {
-            future.get();
-            isUpdating = false;
-            updateSolver = false;
-        }
-    }
-    if (updateSolver)
-    {
-        ImGui::TextUnformatted("Updating...");
-        return;
-    }
-
-
-    if (!isUpdating)
-    {
-        isChanged |= ImGui::InputFloat("Viscosity", &(JSSFSolver.visc));
-        isChanged |= ImGui::InputFloat("Diffusion", &(JSSFSolver.diff));
-        isChanged |= ImGui::InputFloat("Dissipation", &(JSSFSolver.diss));
-        if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
-        {
-            for (int bc=0; bc < 2; bc++)
-            {
-                const bool is_selected = (currentBC == bc);
-                if (ImGui::Selectable(bcTypes[bc], is_selected))
-                    {currentBC = bc; if (bc==0) fluidBound = jfs::ZERO; else fluidBound = jfs::PERIODIC;}
-
-                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                if (is_selected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                    isChanged = true;
-                }            
-            }
-            ImGui::EndCombo();
-        }
-    
-
-        if (isChanged)
-            if (ImGui::Button("Update Fluid Properties"))
-            {
-                updateSolver = true;
-                isChanged = false;
-                return;
-            }
-    }
-}
-
-void doLBMMenu()
-{
-    static bool isChanged = false;
-    static const char* bcTypes[2] = {"Zero", "Periodic"};
-    static int currentBC = 0;
-    static std::future<void> future;
-
-    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
-    static float rho0 = LBMSolver.rho0, visc = LBMSolver.visc, us = LBMSolver.us;
-
-    if (updateSolver && !isCalcFrame)
-    {
-        if (!isUpdating)
-        {
-            auto initLambda = [](){LBMSolver.initialize(N,L,1/dt,rho0,visc,us);};
-            future = std::async(std::launch::async, initLambda);
-            isUpdating = true;
-        }
-        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
-        {
-            future.get();
-            isUpdating = false;
-            updateSolver = false;
-        }
-    }
-    if (updateSolver)
-    {
-        ImGui::TextUnformatted("Updating...");
-        return;
-    }
-
-
-    if (!isUpdating)
-    {
-        isChanged |= ImGui::InputFloat("Density", &(rho0));
-        isChanged |= ImGui::InputFloat("Viscosity", &(visc),0,0,"%.0e");
-        isChanged |= ImGui::InputFloat("Speed of Sound", &(us));
-    
-
-        if (isChanged)
-            if (ImGui::Button("Update Fluid Properties"))
-            {
-                updateSolver = true;
-                isChanged = false;
-                return;
-            }
-    }
-}
-
-void doJSSF3DMenu()
-{
-    static bool isChanged = false;
-    static const char* bcTypes[2] = {"Zero", "Periodic"};
-    static int currentBC = 0;
-    static std::future<void> future;
-
-    static float visc = JSSFSolver3D.visc, diff = JSSFSolver3D.diff, diss = JSSFSolver3D.diss;
-    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
-
-    if (updateSolver && !isCalcFrame)
-    {
-        if (!isUpdating)
-        {
-            auto initLambda = [](){JSSFSolver3D.initialize(N,L,fluidBound,dt,visc,diff,diss);};
+            auto initLambda = [](){JSSFSolverIter->initialize(N,L,fluidBound,dt,visc,diff,diss);};
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }
@@ -299,16 +184,169 @@ void doJSSF3DMenu()
     }
 }
 
-void minimizeMem()
+void doLBMMenu()
 {
+    static bool isChanged = false;
+    static const char* bcTypes[2] = {"Zero", "Periodic"};
+    static int currentBC = 0;
+    static std::future<void> future;
+
+    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
+    static float rho0 = 1.3, visc = 1e-4, us = 1;
+
+    if (updateSolver && !isCalcFrame)
+    {
+        if (!isUpdating)
+        {
+            auto initLambda = [](){LBMSolver->initialize(N,L,1/dt,rho0,visc,us);};
+            future = std::async(std::launch::async, initLambda);
+            isUpdating = true;
+        }
+        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        {
+            future.get();
+            isUpdating = false;
+            updateSolver = false;
+        }
+    }
     if (updateSolver)
     {
-        JSSFSolver.initialize(1,L,jfs::ZERO,dt);
-        JSSFSolverIter.initialize(1,L,jfs::ZERO,dt);
-        LBMSolver.initialize(1,L,1/dt);
-        JSSFSolver3D.initialize(1,L,jfs::ZERO,dt);
-        updateSolver = true;
+        ImGui::TextUnformatted("Updating...");
+        return;
     }
+
+
+    if (!isUpdating)
+    {
+        isChanged |= ImGui::InputFloat("Density", &(rho0));
+        isChanged |= ImGui::InputFloat("Viscosity", &(visc),0,0,"%.0e");
+        isChanged |= ImGui::InputFloat("Speed of Sound", &(us));
+    
+
+        if (isChanged)
+            if (ImGui::Button("Update Fluid Properties"))
+            {
+                updateSolver = true;
+                isChanged = false;
+                return;
+            }
+    }
+}
+
+void doJSSF3DMenu()
+{
+    static bool isChanged = false;
+    static const char* bcTypes[2] = {"Zero", "Periodic"};
+    static int currentBC = 0;
+    static std::future<void> future;
+
+    static float visc = 0, diff = 0, diss = 0;
+    static jfs::BOUND_TYPE fluidBound = jfs::ZERO;
+
+    if (updateSolver && !isCalcFrame)
+    {
+        if (!isUpdating)
+        {
+            auto initLambda = [](){JSSFSolver3D->initialize(N,L,fluidBound,dt,visc,diff,diss);};
+            future = std::async(std::launch::async, initLambda);
+            isUpdating = true;
+        }
+        if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        {
+            future.get();
+            isUpdating = false;
+            updateSolver = false;
+        }
+    }
+    if (updateSolver)
+    {
+        ImGui::TextUnformatted("Updating...");
+        return;
+    }
+
+
+    if (!isUpdating)
+    {
+        isChanged |= ImGui::InputFloat("Viscosity", &(visc));
+        isChanged |= ImGui::InputFloat("Diffusion", &(diff));
+        isChanged |= ImGui::InputFloat("Dissipation", &(diss));
+        if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
+        {
+            for (int bc=0; bc < 2; bc++)
+            {
+                const bool is_selected = (currentBC == bc);
+                if (ImGui::Selectable(bcTypes[bc], is_selected))
+                    {currentBC = bc; if (bc==0) fluidBound = jfs::ZERO; else fluidBound = jfs::PERIODIC;}
+
+                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                if (is_selected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                    isChanged = true;
+                }            
+            }
+            ImGui::EndCombo();
+        }
+    
+
+        if (isChanged)
+            if (ImGui::Button("Update Fluid Properties"))
+            {
+                updateSolver = true;
+                isChanged = false;
+                return;
+            }
+    }
+}
+
+// frees currentSolver from heap
+void releaseMem()
+{
+    switch (currentSolver)
+    {
+    case JSSF:
+        delete JSSFSolver;
+        break;
+    case JSSFIter:
+        delete JSSFSolverIter;
+        break;
+    case LBM:
+        delete LBMSolver;
+        break;
+    case JSSF3D:
+        delete JSSFSolver3D;
+        break;
+    }  
+}
+
+// must be called before newsolver==currentSolver
+// allocates newsolver on heap
+// frees currentsolver on heap
+void handleMem(SOLVER_TYPE newsolver)
+{
+    if (currentSolver == newsolver)
+    {
+        std::cerr << "ERROR: Memory handling of solver types" << std::endl;
+        exit(-1);
+    }
+    releaseMem();
+
+    switch (newsolver)
+    {
+    case JSSF:
+        JSSFSolver = new jfs::JSSFSolver<>(1, L, jfs::ZERO, dt);
+        break;
+    case JSSFIter:
+        JSSFSolverIter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, dt);
+        break;
+    case LBM:
+        LBMSolver = new jfs::LBMSolver (1, L, 1/dt);
+        break;
+    case JSSF3D:
+        JSSFSolver3D = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, dt);
+        break;
+    }
+    updateSolver = true;
 }
 
 void doSolverMenu()
@@ -358,7 +396,8 @@ void doSolverMenu()
     {
         if (!isUpdating)
         {
-            future = std::async(std::launch::async, minimizeMem);
+            auto handleMemLambda = [](){handleMem((SOLVER_TYPE) currentSolverTmp);};
+            future = std::async(std::launch::async, handleMemLambda);
             isUpdating = true;
         }
         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )

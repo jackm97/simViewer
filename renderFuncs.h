@@ -52,19 +52,19 @@ bool JSSFRender(void* imgPtr)
     bool newImage = false;
     if (isResetting)
     {
-        JSSFSolver.resetFluid();
+        JSSFSolver->resetFluid();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = JSSFSolver.calcNextStep(forces,sources)) )
+        if ( !(failedStep = JSSFSolver->calcNextStep(forces,sources)) )
         {
             nextFrame = false;
             newImage = true;
         }
     }
-    if (newImage) JSSFSolver.getImage(img);
+    if (newImage) JSSFSolver->getImage(img);
     return newImage;
 }
 
@@ -74,19 +74,19 @@ bool JSSFIterRender(void* imgPtr)
     bool newImage = false;
     if (isResetting)
     {
-        JSSFSolverIter.resetFluid();
+        JSSFSolverIter->resetFluid();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = JSSFSolverIter.calcNextStep(forces,sources)) )
+        if ( !(failedStep = JSSFSolverIter->calcNextStep(forces,sources)) )
         {
             nextFrame = false;
             newImage = true;
         }
     }
-    if (newImage) JSSFSolverIter.getImage(img);
+    if (newImage) JSSFSolverIter->getImage(img);
     return newImage;
 }
 
@@ -96,19 +96,19 @@ bool LBMRender(void* imgPtr)
     bool newImage = false;
     if (isResetting)
     {
-        LBMSolver.resetFluid();
+        LBMSolver->resetFluid();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = LBMSolver.calcNextStep(forces,sources)) )
+        if ( !(failedStep = LBMSolver->calcNextStep(forces,sources)) )
         {
             nextFrame = false;
             newImage = true;
         }
     }
-    if (newImage) LBMSolver.getImage(img);
+    if (newImage) LBMSolver->getImage(img);
     return newImage;
 }
 
@@ -118,19 +118,19 @@ bool JSSF3DRender(void* imgPtr)
     bool newImage = false;
     if (isResetting)
     {
-        JSSFSolver3D.resetFluid();
+        JSSFSolver3D->resetFluid();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = JSSFSolver3D.calcNextStep(forces,sources)) )
+        if ( !(failedStep = JSSFSolver3D->calcNextStep(forces,sources)) )
         {
             nextFrame = false;
             newImage = true;
         }
     }
-    if (newImage) JSSFSolver3D.getImage(img);
+    if (newImage) JSSFSolver3D->getImage(img);
     return newImage;
 }
 
@@ -192,6 +192,11 @@ void renderSims()
         switch (currentSolver)
         {
         case EMPTY:
+            if (isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready))
+            {
+                isCalcFrame = false;
+                future.get();
+            }
             fps = 0;
             break;
 

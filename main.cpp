@@ -75,11 +75,11 @@ bool updateSolver = false;
 
 // fluid solvers
 //      2D
-jfs::JSSFSolver<> JSSFSolver(1,L,jfs::ZERO,dt);
-jfs::JSSFSolver<jfs::iterativeSolver> JSSFSolverIter(1,L,jfs::ZERO,dt);
-jfs::LBMSolver LBMSolver(1,L,1/dt);
+jfs::JSSFSolver<>* JSSFSolver; //(1,L,jfs::ZERO,dt);
+jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,dt);
+jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
-jfs::JSSFSolver3D<jfs::iterativeSolver> JSSFSolver3D(1,L,jfs::ZERO,dt);
+jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 
 
 // Sources, Forces and Points
@@ -210,6 +210,8 @@ int main(int, char**) {
     glfwDestroyWindow(menuWindow);
     glfwDestroyWindow(renderWindow);
     glfwTerminate();
+
+    releaseMem();
 
     return 0;
 }

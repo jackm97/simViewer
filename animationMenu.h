@@ -78,19 +78,19 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
     switch (currentSolver)
     {
     case JSSF:
-        JSSFSolver.getImage(img);
+        JSSFSolver->getImage(img);
         break;
 
     case JSSFIter:
-        JSSFSolverIter.getImage(img);
+        JSSFSolverIter->getImage(img);
         break;
 
     case LBM:
-        LBMSolver.getImage(img);
+        LBMSolver->getImage(img);
         break;
 
     case JSSF3D:
-        JSSFSolver3D.getImage(img);
+        JSSFSolver3D->getImage(img);
         break;
     }
 
