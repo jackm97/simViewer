@@ -58,8 +58,12 @@ set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
                 ${PROJECT_SOURCE_DIR}/extern/ImGuiFileDialog/ImGuiFileDialog.cpp)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-# put fonts in binary directory
+# make binary directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# put fonts above binary directory
 file(COPY ${IMGUI_FONTS_PATH} DESTINATION ${CMAKE_BINARY_DIR})
+#cache directory
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.cache)
 #########################IMGUI##########################
 
 #########################OPENVDB########################
@@ -73,7 +77,6 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${OPENVDB_INSTALL_PATH}/lib/cmake/OpenVDB")
 
 if (WIN32)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     file(COPY "${OPENVDB_INSTALL_PATH}/bin/openvdb.dll" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
     
     add_definitions(-D__TBB_NO_IMPLICIT_LINKAGE=1)
