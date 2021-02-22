@@ -85,14 +85,18 @@ if (WIN32)
         set(VCPKG_PACKAGE_PATH "${VCPKG_PATH}/../../packages")
         
         set(HALF_DLL_PATH "${VCPKG_PACKAGE_PATH}/openexr_x64-windows")
-        set(HALF_DLL_FILENAME "Half-2_5.dll")
+
+        find_package(OpenEXR)
+        set(HALF_DLL_FILENAME "Half-${OpenEXR_VERSION_MAJOR}_${OpenEXR_VERSION_MINOR}.dll")
         file(COPY "${HALF_DLL_PATH}/bin/${HALF_DLL_FILENAME}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
         
         set(TBB_DLL_PATH "${VCPKG_PACKAGE_PATH}/tbb_x64-windows")
         file(COPY "${TBB_DLL_PATH}/bin/tbb.dll" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
         
+        find_package(ZLIB)
         set(ZLIB_DLL_PATH "${VCPKG_PACKAGE_PATH}/zlib_x64-windows")
-        file(COPY "${ZLIB_DLL_PATH}/bin/zlib1.dll" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        set(ZLIB_DLL_FILENAME "zlib${ZLIB_VERSION_MAJOR}.dll")
+        file(COPY "${ZLIB_DLL_PATH}/bin/${ZLIB_DLL_FILENAME}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endif()
 
 find_package(OpenVDB REQUIRED)
