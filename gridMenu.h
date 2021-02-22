@@ -58,6 +58,7 @@ void doGridMenu()
         dt = dtTemp;
         updateSolver = true;
         updateGrid = false;
+        updateRenderer();
     }
     // if (updateGrid)
     // {
