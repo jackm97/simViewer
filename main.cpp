@@ -151,7 +151,7 @@ int main(int, char**) {
     // High-DPI
     ImGuiStyle &style = ImGui::GetStyle();
     style.ScaleAllSizes(1.5);
-    io.Fonts->AddFontFromFileTTF("../extern/imgui/misc/fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
+    io.Fonts->AddFontFromFileTTF("../fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
 
     // Main loop
     while (!(glfwWindowShouldClose(menuWindow) || glfwWindowShouldClose(renderWindow)) || isUpdating || isCalcFrame)
