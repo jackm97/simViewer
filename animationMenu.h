@@ -117,7 +117,7 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
 
 }
 
-bool clearCache(std::string cache_loc)
+bool clearCache(std::string cache_loc, std::string cache_name)
 {
 
     namespace fs = std::filesystem;
@@ -125,17 +125,29 @@ bool clearCache(std::string cache_loc)
     ImGui::TextUnformatted("Clear Cache?");
     if (ImGui::Button("OK"))
     {
-        #ifdef _WIN32
-        std::vector<std::wstring> files;
-        #endif
-        #if defined(unix) || defined(__unix__) || defined(__unix)
         std::vector<std::string> files;
-        #endif
         for(auto& p: fs::directory_iterator(cache_loc.c_str()))
-            files.push_back(p.path());
+            files.push_back(p.path().u8string());
 
         for (int f = 0; f < files.size(); f++)
-            fs::remove(files[f]);
+        {
+            const char* cmpr_str1 = cache_name.c_str();
+            char* cmpr_str2 = new char [cache_name.length()];
+            int current_fname_len = files[f].length() - cache_loc.length();
+            
+            int i;
+            for (i = 0; i < cache_name.size() && i < current_fname_len; i++)
+                cmpr_str2[i] = files[f][cache_loc.length() + i];
+            cmpr_str2[i] = '\0';
+            
+            std::cout << cmpr_str1 << std::endl;
+            std::cout << cmpr_str2 << std::endl;
+
+            if (std::strcmp(cmpr_str1, cmpr_str2) == 0)
+                fs::remove(files[f]);
+
+            delete [] cmpr_str2;
+        }
 
         return true;
     }
@@ -217,8 +229,9 @@ void doAnimationWindow()
             {
                 if (clear_cache)
                 {
-                    if ( clearCache(cache_loc) )
+                    if ( clearCache(cache_loc, cache_name) )
                         clear_cache = false;
+                    ImGui::TreePop();
                     ImGui::End();
                     return;
                 }
