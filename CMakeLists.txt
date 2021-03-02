@@ -19,18 +19,12 @@ find_package(glfw3 3.3 REQUIRED)
 set(PATH_TO_GLR ${PROJECT_SOURCE_DIR}/extern/GLR/)
 #   EXTERNAL LIB PATHS
 set(GLM_PATH ${PATH_TO_GLR}/extern/glm)
-set(GLAD_PATH ${PATH_TO_GLR}/extern/glad)
-set(GLAD_SRC_NAME glad.c)
 
 add_definitions(-DGLRENDER_STATIC)
 add_subdirectory(${PATH_TO_GLR})
 
 include_directories(${PATH_TO_GLR}
-                    ${GLM_PATH}
-                    ${GLAD_PATH}/include)
-
-add_library(glad STATIC ${GLAD_PATH}/src/${GLAD_SRC_NAME})
-target_link_libraries(glad PRIVATE ${CMAKE_DL_LIBS})
+                    ${GLM_PATH})
 #########################LIBGLR########################
 
 #########################LIBJFS########################
@@ -61,8 +55,6 @@ set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
                 ${PROJECT_SOURCE_DIR}/extern/ImGuiFileDialog/ImGuiFileDialog.cpp)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-# make binary directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # put fonts above binary directory
 file(COPY ${IMGUI_FONTS_PATH} DESTINATION ${CMAKE_BINARY_DIR})
 #cache directory
@@ -87,22 +79,22 @@ if (WIN32)
     # BELOW IS REQUIRED WHEN DOING DEBUG CONFIG
     # DUE TO OPENVDB NOT HAVING PROPER DEBUG SETUP
     # ON WINDOWS
-        get_filename_component(VCPKG_PATH ${CMAKE_TOOLCHAIN_FILE} DIRECTORY) 
-        set(VCPKG_PACKAGE_PATH "${VCPKG_PATH}/../../packages")
-        
-        set(HALF_DLL_PATH "${VCPKG_PACKAGE_PATH}/openexr_x64-windows")
+    get_filename_component(VCPKG_PATH ${CMAKE_TOOLCHAIN_FILE} DIRECTORY) 
+    set(VCPKG_PACKAGE_PATH "${VCPKG_PATH}/../../packages")
+    
+    set(HALF_DLL_PATH "${VCPKG_PACKAGE_PATH}/openexr_x64-windows")
 
-        find_package(OpenEXR)
-        set(HALF_DLL_FILENAME "Half-${OpenEXR_VERSION_MAJOR}_${OpenEXR_VERSION_MINOR}.dll")
-        file(COPY "${HALF_DLL_PATH}/bin/${HALF_DLL_FILENAME}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-        
-        set(TBB_DLL_PATH "${VCPKG_PACKAGE_PATH}/tbb_x64-windows")
-        file(COPY "${TBB_DLL_PATH}/bin/tbb.dll" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-        
-        find_package(ZLIB)
-        set(ZLIB_DLL_PATH "${VCPKG_PACKAGE_PATH}/zlib_x64-windows")
-        set(ZLIB_DLL_FILENAME "zlib${ZLIB_VERSION_MAJOR}.dll")
-        file(COPY "${ZLIB_DLL_PATH}/bin/${ZLIB_DLL_FILENAME}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    find_package(OpenEXR)
+    set(HALF_DLL_FILENAME "Half-${OpenEXR_VERSION_MAJOR}_${OpenEXR_VERSION_MINOR}.dll")
+    file(COPY "${HALF_DLL_PATH}/bin/${HALF_DLL_FILENAME}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    
+    set(TBB_DLL_PATH "${VCPKG_PACKAGE_PATH}/tbb_x64-windows")
+    file(COPY "${TBB_DLL_PATH}/bin/tbb.dll" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    
+    find_package(ZLIB)
+    set(ZLIB_DLL_PATH "${VCPKG_PACKAGE_PATH}/zlib_x64-windows")
+    set(ZLIB_DLL_FILENAME "zlib${ZLIB_VERSION_MAJOR}.dll")
+    file(COPY "${ZLIB_DLL_PATH}/bin/${ZLIB_DLL_FILENAME}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endif()
 
 find_package(OpenVDB REQUIRED)
@@ -111,6 +103,14 @@ find_package(OpenVDB REQUIRED)
 #########################THREADS########################
 find_package (Threads REQUIRED)
 #########################THREADS########################
+
+#########################GLAD########################
+set(GLAD_SRC_NAME glad.c) 
+set(GLAD_PATH ${PROJECT_SOURCE_DIR}/extern/glad)
+include_directories(${GLAD_PATH}/include)
+add_library(glad STATIC ${GLAD_PATH}/src/${GLAD_SRC_NAME})
+target_link_libraries(glad PRIVATE ${CMAKE_DL_LIBS})
+#########################GLAD########################
 
 set(SIMVIEWER_LIBS  ${THREADS_LIB}
                     jfs
