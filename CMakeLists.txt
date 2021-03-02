@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(${PROJECT_SOURCE_DIR}/extern)
 
+# make binary directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 #########################GLFW########################
 find_package(glfw3 3.3 REQUIRED)
 #########################GLFW########################
