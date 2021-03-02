@@ -153,6 +153,10 @@ int main(int, char**) {
     style.ScaleAllSizes(1.5);
     io.Fonts->AddFontFromFileTTF("../fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
 
+
+    // Initialize GLR library
+    glr::initialize();
+
     // Main loop
     while (!(glfwWindowShouldClose(menuWindow) || glfwWindowShouldClose(renderWindow)) || isUpdating || isCalcFrame)
     {
@@ -197,15 +201,17 @@ int main(int, char**) {
         viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
         glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
         
-        renderSims();
-        
-        glfwSwapBuffers(renderWindow);
+        if (renderSims())
+            glfwSwapBuffers(renderWindow);
     }
 
-    // Cleanup
+    // Imgui Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
+    // GLR Cleanup
+    renderer2D.cleanup();
 
     glfwDestroyWindow(menuWindow);
     glfwDestroyWindow(renderWindow);
