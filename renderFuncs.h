@@ -1,7 +1,7 @@
 #ifndef RENDERFUNCS_H
 #define RENDERFUNCS_H
 
-#include <glr/sceneViewer2D.h>
+#include <glr/sceneviewer2d.h>
 
 #include <future>
 
@@ -40,8 +40,8 @@ void updateRenderer()
         img.setZero();
         renderer2D.deleteTexture("background");
         renderer2D.addTexture(N,N,"background");
-        renderer2D.uploadPix2Tex("background", GL_RGB, GL_FLOAT, img.data());
-        renderer2D.changeBounds(L, L);
+        renderer2D.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img.data());
+        renderer2D.setBounds(L, L);
         break;
     }
 }
@@ -63,6 +63,11 @@ bool JSSFRender(void* imgPtr)
             nextFrame = false;
             newImage = true;
         }
+    }
+    else if (reRender)
+    {
+        reRender = false;
+        newImage = true;
     }
     if (newImage) JSSFSolver->getImage(img);
     return newImage;
@@ -86,6 +91,11 @@ bool JSSFIterRender(void* imgPtr)
             newImage = true;
         }
     }
+    else if (reRender)
+    {
+        reRender = false;
+        newImage = true;
+    }
     if (newImage) JSSFSolverIter->getImage(img);
     return newImage;
 }
@@ -102,11 +112,16 @@ bool LBMRender(void* imgPtr)
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = LBMSolver->calcNextStep(forces,sources)) )
+        if ( !(failedStep = LBMSolver->calcNextStep(forces,sources,p_waves)) )
         {
             nextFrame = false;
             newImage = true;
         }
+    }
+    else if (reRender)
+    {
+        reRender = false;
+        newImage = true;
     }
     if (newImage) LBMSolver->getImage(img);
     return newImage;
@@ -130,24 +145,31 @@ bool JSSF3DRender(void* imgPtr)
             newImage = true;
         }
     }
+    else if (reRender)
+    {
+        reRender = false;
+        newImage = true;
+    }
     if (newImage) JSSFSolver3D->getImage(img);
     return newImage;
 }
 
-void renderSims()
+bool renderSims()
 {
     static float currentTime = 0;
     static float oldTime = 0;
+    static float oldRenderTime = 0;
     static std::future<bool> future; 
 
     static bool firstCall = true;
     if (firstCall)
     {
-        renderer2D.init(L,L);
+        renderer2D.init();
+        renderer2D.setBounds(L,L);
         renderer2D.addTexture(N,N,"background");
         img.resize(N*N*3);
         img.setZero();
-        renderer2D.uploadPix2Tex("background", GL_RGB, GL_FLOAT, img.data());
+        renderer2D.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img.data());
         firstCall = false;
     }
 
@@ -156,43 +178,45 @@ void renderSims()
     // so that the overhead of starting 
     // async doesn't interfere with framerate
     // calculation
-    if (!isUpdating)
+    if (!isUpdating && !isCalcFrame)
     {
         switch (currentSolver)
         {
         case JSSF:
-            if (!isCalcFrame) {
+            if ((nextFrame || isAnimating || isResetting || reRender)) {
                 future = std::async(std::launch::async, JSSFRender, (void*) &img);
                 isCalcFrame = true;
             }
             break;
         case JSSFIter:
-            if (!isCalcFrame) {
+            if ((nextFrame || isAnimating || isResetting || reRender)) {
                 future = std::async(std::launch::async, JSSFIterRender, (void*) &img);
                 isCalcFrame = true;
             }
             break;
         case LBM:
-            if (!isCalcFrame) {
+            if ((nextFrame || isAnimating || isResetting || reRender)) {
                 future = std::async(std::launch::async, LBMRender, (void*) &img);
                 isCalcFrame = true;
             }
             break;
         case JSSF3D:
-            if (!isCalcFrame) {
+            if ((nextFrame || isAnimating || isResetting || reRender)) {
                 future = std::async(std::launch::async, JSSF3DRender, (void*) &img);
                 isCalcFrame = true;
             }
             break;
-        }    
+        }  
     }
 
+    currentTime = glfwGetTime();
+
     if (!isUpdating && (currentTime - oldTime > dt))
-    {
+    {        
         switch (currentSolver)
         {
         case EMPTY:
-            if (isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready))
+            if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;
                 future.get();
@@ -204,40 +228,54 @@ void renderSims()
         case JSSF:
         case JSSFIter:
         case LBM:
-            if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+            if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;
                 fps = 1/(currentTime - oldTime);
-                oldTime = glfwGetTime();
-                if (future.get()) renderer2D.uploadPix2Tex("background", GL_RGB, GL_FLOAT, img.data());
+                oldTime = glfwGetTime();  
+                if (future.get()) renderer2D.getTexture("background")->loadPixels( GL_RGB, GL_FLOAT, img.data());
             }
             break;
 
         // 3D
         case JSSF3D:
-            if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+            if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;
                 fps = 1/(currentTime - oldTime);
-                oldTime = glfwGetTime();
+                oldTime = glfwGetTime();  
                 future.get();
             }
             break;
         }    
     }
 
+    currentTime = glfwGetTime();
+
+    bool frameRendered = false;
+    double maxfps = 240;
     switch (currentRenderer)
     {
     case NONE:
+        if (currentTime - oldRenderTime > 1/maxfps)
+        {
+            frameRendered = true;
+            oldRenderTime = glfwGetTime();
+        }
         break;
     
     // 2D
     case DIM2:
-        renderer2D.drawScene();
+        if (currentTime - oldRenderTime > 1/maxfps)
+        {
+            renderer2D.drawScene();
+            frameRendered = true;
+            oldRenderTime = glfwGetTime();
+        }
         break;
     }
 
-    currentTime = glfwGetTime();
+    return frameRendered;
 }
 
 #endif

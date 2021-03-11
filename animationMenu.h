@@ -139,9 +139,6 @@ bool clearCache(std::string cache_loc, std::string cache_name)
             for (i = 0; i < cache_name.size() && i < current_fname_len; i++)
                 cmpr_str2[i] = files[f][cache_loc.length() + i];
             cmpr_str2[i] = '\0';
-            
-            std::cout << cmpr_str1 << std::endl;
-            std::cout << cmpr_str2 << std::endl;
 
             if (std::strcmp(cmpr_str1, cmpr_str2) == 0)
                 fs::remove(files[f]);
@@ -198,6 +195,8 @@ void doAnimationMenu(bool& checkDone, bool& acknowledgeFailedStep)
     else if (isAnimating && (checkDone = ImGui::Button("Stop"))) isAnimating=false;
 
     if (!checkDone && !isAnimating && (checkDone = ImGui::Button("Next Frame"))) nextFrame=true;
+
+    if (!checkDone && !isAnimating && ImGui::Button("Render Frame Again")) reRender = true;
     
     if (!checkDone && (checkDone = ImGui::Button("Reset"))) isResetting = true;
 
@@ -230,7 +229,10 @@ void doAnimationWindow()
                 if (clear_cache)
                 {
                     if ( clearCache(cache_loc, cache_name) )
+                    {
                         clear_cache = false;
+                        cache_frame = 0;
+                    }
                     ImGui::TreePop();
                     ImGui::End();
                     return;
@@ -251,6 +253,9 @@ void doAnimationWindow()
         }
 
         doAnimationMenu(checkDone, acknowledgeFailedStep);
+
+        if (isResetting)
+            cache_frame = 0;
 
         if (isCache && (isAnimating || checkDone) && !isCalcFrame)
             cacheFrame(cache_frame, cache_loc, cache_name);

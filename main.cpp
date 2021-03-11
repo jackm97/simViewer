@@ -38,13 +38,14 @@ Eigen::VectorXf img;
 // Animation Flags
 bool isAnimating = false;
 bool nextFrame = false;
+bool reRender = false;
 bool isResetting = false;
 bool failedStep = false;
 
 // Renderers
-#include <glr/sceneViewer2D.h>
+#include <glr/sceneviewer2d.h>
 glr::sceneViewer2D renderer2D;
-#include <glr/sceneViewer.h>
+#include <glr/sceneviewer.h>
 glr::sceneViewer renderer3D;
 
 typedef enum {
@@ -85,12 +86,14 @@ jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 // Sources, Forces and Points
 std::vector<jfs::Force> forces;
 std::vector<jfs::Source> sources;
+std::vector<jfs::PressureWave> p_waves;
 
 #include "renderFuncs.h"
 #include "animationMenu.h"
 #include "solverMenus.h"
 #include "forcesMenus.h"
 #include "sourcesMenus.h"
+#include "pressureWaveMenu.h"
 #include "gridMenu.h"
 
 int main(int, char**) {
@@ -176,6 +179,7 @@ int main(int, char**) {
         doMainWindow();
         doForceWindow();
         doSourceWindow();
+        doPressureWindow();
 
         // UI Stuff
         glfwMakeContextCurrent(menuWindow);
@@ -212,6 +216,7 @@ int main(int, char**) {
 
     // GLR Cleanup
     renderer2D.cleanup();
+    glr::cleanup();
 
     glfwDestroyWindow(menuWindow);
     glfwDestroyWindow(renderWindow);

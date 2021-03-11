@@ -39,6 +39,12 @@ add_subdirectory(${PATH_TO_JFS})
 
 include_directories(${PATH_TO_JFS}
                     ${EIGEN_PATH})
+
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    add_definitions(-DUSE_OPENMP)
+    target_link_libraries(jfs PUBLIC OpenMP::OpenMP_CXX)
+endif()
 #########################LIBJFS########################
 
 #########################IMGUI##########################
@@ -117,13 +123,8 @@ set(SIMVIEWER_LIBS  ${THREADS_LIB}
                     glr
                     glad
                     glfw
-                    OpenVDB::openvdb)
+                    OpenVDB::openvdb
+                    OpenMP::OpenMP_CXX)
 
 add_executable(simViewer main.cpp ${IMGUI_SRC})
 target_link_libraries(simViewer PUBLIC ${SIMVIEWER_LIBS})
-
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    add_definitions(-DUSE_OPENMP)
-    target_link_libraries(jfs PUBLIC OpenMP::OpenMP_CXX)
-endif()
