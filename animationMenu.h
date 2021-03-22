@@ -209,8 +209,7 @@ void doAnimationWindow()
     static bool isCache = false;
     static ImGuiFileDialog fileDialog;
     static std::string cache_loc = "../.cache/";
-    static std::string cache_name = "result";
-    cache_name.reserve(1000);
+    static char cache_name[1000] = "result";
     static int cache_frame = 0;
     static bool clear_cache = false;
 
@@ -243,7 +242,7 @@ void doAnimationWindow()
                     if (ImGui::Button("Cache Location"))
                         fileDialog.OpenDialog("ChooseDirDlgKey", "Choose a Directory", nullptr, cache_loc);
                     ImGui::TextUnformatted(cache_loc.c_str());
-                    if (ImGui::InputText("Cache Name", cache_name.data(), 1000) || isResetting)
+                    if (ImGui::InputText("Cache Name", cache_name, 1000) || isResetting)
                         cache_frame = 0;
                     if (ImGui::Button("Clear Cache"))
                         clear_cache = true;

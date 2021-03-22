@@ -19,12 +19,14 @@ find_package(glfw3 3.3 REQUIRED)
 set(PATH_TO_GLR ${PROJECT_SOURCE_DIR}/extern/GLR/)
 #   EXTERNAL LIB PATHS
 set(GLM_PATH ${PATH_TO_GLR}/extern/glm)
+set(EIGEN_PATH ${PROJECT_SOURCE_DIR}/extern/GLR/extern/eigen)
 
 add_definitions(-DGLRENDER_STATIC)
 add_subdirectory(${PATH_TO_GLR})
 
 include_directories(${PATH_TO_GLR}
-                    ${GLM_PATH})
+                    ${GLM_PATH}
+                    ${EIGEN_PATH})
 #########################LIBGLR########################
 
 #########################LIBJFS########################
@@ -32,7 +34,7 @@ include_directories(${PATH_TO_GLR}
 #   JFS PATH
 set(PATH_TO_JFS ${PROJECT_SOURCE_DIR}/extern/JFS/)
 #   EXTERNAL LIB PATHS
-set(EIGEN_PATH ${PROJECT_SOURCE_DIR}/extern/JFS/extern/eigen)
+# set(EIGEN_PATH ${PROJECT_SOURCE_DIR}/extern/JFS/extern/eigen)
 
 add_definitions(-DJFS_STATIC)
 add_subdirectory(${PATH_TO_JFS})
