@@ -72,7 +72,6 @@ jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 // Sources, Forces and Points
 std::vector<jfs::Force> forces;
 std::vector<jfs::Source> sources;
-std::vector<jfs::PressureWave> p_waves;
 
 int main(int, char**) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);

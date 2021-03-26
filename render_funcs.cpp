@@ -110,7 +110,7 @@ bool LBMRender(void* imgPtr)
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = LBMSolver->calcNextStep(forces,sources,p_waves)) )
+        if ( !(failedStep = LBMSolver->calcNextStep(forces,sources)) )
         {
             nextFrame = false;
             newImage = true;

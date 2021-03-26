@@ -82,6 +82,5 @@ extern jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,d
 // Sources, Forces and Points
 extern std::vector<jfs::Force> forces;
 extern std::vector<jfs::Source> sources;
-extern std::vector<jfs::PressureWave> p_waves;
 
 #endif
