@@ -1,7 +1,5 @@
-#ifndef RENDERFUNCS_H
-#define RENDERFUNCS_H
-
-#include <glr/sceneviewer2d.h>
+#include "render_funcs.h"
+#include "global_vars.h"
 
 #include <future>
 
@@ -277,5 +275,3 @@ bool renderSims()
 
     return frameRendered;
 }
-
-#endif

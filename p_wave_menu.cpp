@@ -1,11 +1,5 @@
-#ifndef PRESSUREMENUS_H
-#define PRESSUREMENUS_H
-
-
-#include <imgui/imgui.h>
-#include <vector>
-#include <string>
-
+#include "p_wave_menu.h"
+#include "global_vars.h"
 
 void doPressureWindow()
 {
@@ -110,5 +104,3 @@ void doPressureWindow()
     }
     ImGui::End();
 }
-
-#endif

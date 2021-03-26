@@ -1,49 +1,10 @@
-#ifndef GRIDMENU_H
-#define GRIDMENU_H
+#include "grid_menu.h"
+#include "global_vars.h"
 
-#include <imgui/imgui.h>
+#include "solver_menus.h"
+#include "render_funcs.h"
 
-// void updateSolverGrid()
-// {
-//     float visc;
-//     float diff;
-//     float diss;
-//     float rho0;
-//     float us;
-//     switch (currentSolver)
-//     {
-//     case EMPTY:
-//         break;
-    
-//     case JSSF:
-//         visc = JSSFSolver->visc;
-//         diff = JSSFSolver->diff;
-//         diss = JSSFSolver->diss;
-//         JSSFSolver->initialize(N,L,JSSFSolver->BOUND,dt,visc,diff,diss);
-//         break;
-    
-//     case JSSFIter:
-//         visc = JSSFSolverIter->visc;
-//         diff = JSSFSolverIter->diff;
-//         diss = JSSFSolverIter->diss;
-//         JSSFSolverIter->initialize(N,L,JSSFSolverIter->BOUND,dt,visc,diff,diss);
-//         break;
-    
-//     case LBM:
-//         rho0 = LBMSolver->rho0;
-//         visc = LBMSolver->visc;
-//         us = LBMSolver->us;
-//         LBMSolver->initialize(N,L,1/dt,rho0,visc,us);
-//         break;
-    
-//     case JSSF3D:
-//         visc = JSSFSolver3D->visc;
-//         diff = JSSFSolver3D->diff;
-//         diss = JSSFSolver3D->diss;
-//         JSSFSolver3D->initialize(N,L,JSSFSolver.BOUND,dt,visc,diff,diss);
-//         break;
-//     }
-// }
+#include <future>
 
 void doGridMenu()
 {
@@ -123,5 +84,3 @@ void doMainWindow()
         doGridMenu();
     ImGui::End();
 }
-
-#endif

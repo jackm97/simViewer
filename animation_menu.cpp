@@ -1,5 +1,5 @@
-#ifndef ANIMATIONMENU_H
-#define ANIMATIONMENU_H
+#include "animation_menu.h"
+#include "global_vars.h"
 
 #include <string>
 #include <vector>
@@ -274,5 +274,3 @@ void doAnimationWindow()
         fileDialog.Close();
     }
 }
-
-#endif

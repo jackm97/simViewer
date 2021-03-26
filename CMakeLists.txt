@@ -125,8 +125,25 @@ set(SIMVIEWER_LIBS  ${THREADS_LIB}
                     glr
                     glad
                     glfw
-                    OpenVDB::openvdb
-                    OpenMP::OpenMP_CXX)
+                    OpenVDB::openvdb)
 
-add_executable(simViewer main.cpp ${IMGUI_SRC})
+add_executable(simViewer    main.cpp
+                            grid_menu.cpp
+                            solver_menus.cpp
+                            solver_menus/jssf_menu.cpp
+                            solver_menus/jssf_iter_menu.cpp
+                            solver_menus/lbm_menu.cpp
+                            solver_menus/jssf3d_menu.cpp
+                            animation_menu.cpp
+                            render_funcs.cpp
+                            sources_menu.cpp
+                            forces_menu.cpp
+                            grid_menu.cpp
+                            p_wave_menu.cpp
+                            ${IMGUI_SRC})
 target_link_libraries(simViewer PUBLIC ${SIMVIEWER_LIBS})
+
+if(OpenMP_CXX_FOUND)
+    add_definitions(-DUSE_OPENMP)
+    target_link_libraries(simViewer PUBLIC OpenMP::OpenMP_CXX)
+endif()

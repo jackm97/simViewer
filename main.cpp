@@ -3,10 +3,17 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 #include <glad/glad.h>
-
 #include <GLFW/glfw3.h>
-#include <cstdio>
-#include <iostream>
+
+#include "global_vars.h"
+
+#include "render_funcs.h"
+#include "animation_menu.h"
+#include "solver_menus.h"
+#include "forces_menu.h"
+#include "sources_menu.h"
+#include "p_wave_menu.h"
+#include "grid_menu.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -32,7 +39,6 @@ float dt=.033;
 float fps = 0;
 
 // sim results
-#include <Eigen/Eigen>
 Eigen::VectorXf img;
 
 // Animation Flags
@@ -43,34 +49,14 @@ bool isResetting = false;
 bool failedStep = false;
 
 // Renderers
-#include <glr/sceneviewer2d.h>
 glr::sceneViewer2D renderer2D;
-#include <glr/sceneviewer.h>
 glr::sceneViewer renderer3D;
-
-typedef enum {
-    NONE,
-    DIM2,
-    DIM3
-} RENDER_TYPE;
 
 RENDER_TYPE currentRenderer = NONE;
 
 // Solver Stuff
-#include <jfs/JSSFSolver.h>
-#include <jfs/JSSFSolver3D.h>
-#include <jfs/LBMSolver.h>
-
-typedef enum {
-    EMPTY = 0,
-    JSSF = 1,
-    JSSFIter = 2,
-    LBM = 3,
-    JSSF3D = 4
-} SOLVER_TYPE;
-
-static const int numSolvers = 5;
-static const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative", "Lattice Boltzmann", "JSSF3D"};
+const int numSolvers = 5;
+const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative", "Lattice Boltzmann", "JSSF3D"};
 SOLVER_TYPE currentSolver = EMPTY;
 bool updateSolver = false;
 
@@ -87,14 +73,6 @@ jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 std::vector<jfs::Force> forces;
 std::vector<jfs::Source> sources;
 std::vector<jfs::PressureWave> p_waves;
-
-#include "renderFuncs.h"
-#include "animationMenu.h"
-#include "solverMenus.h"
-#include "forcesMenus.h"
-#include "sourcesMenus.h"
-#include "pressureWaveMenu.h"
-#include "gridMenu.h"
 
 int main(int, char**) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
