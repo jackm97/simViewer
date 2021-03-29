@@ -128,18 +128,18 @@ set(SIMVIEWER_LIBS  ${THREADS_LIB}
                     OpenVDB::openvdb)
 
 add_executable(simViewer    main.cpp
-                            grid_menu.cpp
-                            solver_menus.cpp
-                            solver_menus/jssf_menu.cpp
-                            solver_menus/jssf_iter_menu.cpp
-                            solver_menus/lbm_menu.cpp
-                            solver_menus/jssf3d_menu.cpp
-                            animation_menu.cpp
                             render_funcs.cpp
-                            sources_menu.cpp
-                            forces_menu.cpp
-                            grid_menu.cpp
-                            p_wave_menu.cpp
+                            menus/grid_menu.cpp
+                            menus/solver_menus.cpp
+                            menus/animation_menu.cpp
+                            menus/sources_menu.cpp
+                            menus/forces_menu.cpp
+                            menus/grid_menu.cpp
+                            menus/p_wave_menu.cpp
+                            menus/solver_menus/jssf_menu.cpp
+                            menus/solver_menus/jssf_iter_menu.cpp
+                            menus/solver_menus/lbm_menu.cpp
+                            menus/solver_menus/jssf3d_menu.cpp
                             ${IMGUI_SRC})
 target_link_libraries(simViewer PUBLIC ${SIMVIEWER_LIBS})
 

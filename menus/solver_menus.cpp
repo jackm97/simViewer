@@ -1,7 +1,7 @@
 #include "solver_menus.h"
-#include "global_vars.h"
+#include "../global_vars.h"
 
-#include "render_funcs.h"
+#include "../render_funcs.h"
 
 #include <future>
 
@@ -41,16 +41,16 @@ void handleMem(SOLVER_TYPE newsolver)
     switch (newsolver)
     {
     case JSSF:
-        JSSFSolver = new jfs::JSSFSolver<>(1, L, jfs::ZERO, dt);
+        JSSFSolver = new jfs::JSSFSolver<>(1, L, jfs::ZERO, .1);
         break;
     case JSSFIter:
-        JSSFSolverIter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, dt);
+        JSSFSolverIter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
         break;
     case LBM:
-        LBMSolver = new jfs::LBMSolver (1, L, jfs::ZERO, 1/dt);
+        LBMSolver = new jfs::LBMSolver (1, L, jfs::ZERO, 1);
         break;
     case JSSF3D:
-        JSSFSolver3D = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, dt);
+        JSSFSolver3D = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
         break;
     }
     updateSolver = true;

@@ -1,6 +1,5 @@
 #include "sources_menu.h"
-
-#include "global_vars.h"
+#include "../global_vars.h"
 
 void doSourceWindow()
 {

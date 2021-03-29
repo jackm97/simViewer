@@ -21,15 +21,18 @@ extern bool isUpdating; // is true when thread is running to update solver or gr
 extern unsigned int N; // grid size
 extern float L; // grid length
 
-// Time step
-extern float dt;
+// Rendering
+extern float max_fps; // max sim_fps, if 0, uncapped
+extern const float screen_refresh_rate; // to limit load on GPU
+extern float oldSimTime;
+extern float oldRefreshTime;
+extern float currentTime;
 
 // fps counter
-extern float fps;
+extern float sim_fps;
 
 // sim results
-#include <Eigen/Eigen>
-extern Eigen::VectorXf img;
+extern float* img;
 
 // Animation Flags
 extern bool isAnimating;
@@ -77,6 +80,8 @@ extern jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,d
 extern jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
 extern jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
+
+extern bool view_density;
 
 
 // Sources, Forces and Points

@@ -8,12 +8,12 @@
 #include "global_vars.h"
 
 #include "render_funcs.h"
-#include "animation_menu.h"
-#include "solver_menus.h"
-#include "forces_menu.h"
-#include "sources_menu.h"
-#include "p_wave_menu.h"
-#include "grid_menu.h"
+#include "./menus/animation_menu.h"
+#include "./menus/solver_menus.h"
+#include "./menus/forces_menu.h"
+#include "./menus/sources_menu.h"
+#include "./menus/p_wave_menu.h"
+#include "./menus/grid_menu.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -32,14 +32,18 @@ bool isUpdating = false; // is true when thread is running to update solver or g
 unsigned int N=64; // grid size
 float L=1.; // grid length
 
-// Time step
-float dt=.033;
+// Rendering
+float max_fps = 60; // max sim_fps, if 0, uncapped
+const float screen_refresh_rate = 240; // to limit load on GPU
+float oldSimTime = 0;
+float oldRefreshTime = 0;
+float currentTime = 0;
 
 // fps counter
-float fps = 0;
+float sim_fps;
 
 // sim results
-Eigen::VectorXf img;
+float* img;
 
 // Animation Flags
 bool isAnimating = false;
@@ -67,6 +71,8 @@ jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,dt);
 jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
 jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
+
+bool view_density = false;
 
 
 // Sources, Forces and Points
@@ -158,29 +164,37 @@ int main(int, char**) {
         doSourceWindow();
         doPressureWindow();
 
+        currentTime = glfwGetTime();
+
         // UI Stuff
         glfwMakeContextCurrent(menuWindow);
         ImGui::Render();    
         
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-        
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        
-        glfwSwapBuffers(menuWindow);
+
+        if ((currentTime - oldRefreshTime) > 1/screen_refresh_rate)
+        {
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            
+            glfwSwapBuffers(menuWindow);
+        }
         
         // Render Stuff
         glfwMakeContextCurrent(renderWindow);
         
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        // viewport stuff
-        int viewPortSize;
-        int display_w, display_h;
-        glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
-        viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
-        glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
+        if ((currentTime - oldRefreshTime) > 1/screen_refresh_rate)
+        {
+            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
+            
+            // viewport stuff
+            int viewPortSize;
+            int display_w, display_h;
+            glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
+            viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
+            glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
+        }
         
         if (renderSims())
             glfwSwapBuffers(renderWindow);

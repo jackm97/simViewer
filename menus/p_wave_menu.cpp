@@ -1,5 +1,5 @@
 #include "p_wave_menu.h"
-#include "global_vars.h"
+#include "../global_vars.h"
 
 struct PressureWave
 {
@@ -82,7 +82,20 @@ void doPressureWindow()
     }
     ImGui::End();
 
-    if (currentSolver == LBM)
+    // if (p_waves.size() > 0 && currentSolver == LBM && (isAnimating || nextFrame) && !isCalcFrame)
+    // {
+    //     float Hz = 1000;
+    //     float w = 2 * M_PI * Hz;
+    //     float force = 50;
+    //     int i = p_waves[0].pos[0] / LBMSolver->DeltaX();
+    //     int j = p_waves[0].pos[1] / LBMSolver->DeltaX();
+    //     float ux = p_waves[0].u_imp * std::sin(w * LBMSolver->Time());
+    //     float uy = 0;
+    //     if (std::cos(w * LBMSolver->Time()) < 0)
+    //         LBMSolver->forceVelocity(i, j, ux, uy);
+    // }
+
+    if (currentSolver == LBM && (isAnimating || nextFrame) && !isCalcFrame)
         for (int p = 0; p < p_waves.size(); p++) doPressureWave(p_waves[p]);
 }
 

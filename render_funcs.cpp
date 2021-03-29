@@ -34,11 +34,9 @@ void updateRenderer()
 
     // 2D
     case DIM2:
-        Eigen::VectorXf img(N*N*3);
-        img.setZero();
-        renderer2D.deleteTexture("background");
-        renderer2D.addTexture(N,N,"background");
-        renderer2D.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img.data());
+        reRender = true;
+        renderer2D.init();
+        renderer2D.getTexture("background")->genNewTexture(N,N);
         renderer2D.setBounds(L, L);
         break;
     }
@@ -46,7 +44,6 @@ void updateRenderer()
 
 bool JSSFRender(void* imgPtr)
 {
-    Eigen::VectorXf &img = *((Eigen::VectorXf*) imgPtr);
     bool newImage = false;
     if (isResetting)
     {
@@ -67,7 +64,7 @@ bool JSSFRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) JSSFSolver->getImage(img);
+    if (newImage) { *(float**)imgPtr = JSSFSolver->imageData();}
     return newImage;
 }
 
@@ -94,7 +91,7 @@ bool JSSFIterRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) JSSFSolverIter->getImage(img);
+    if (newImage) { *(float**)imgPtr = JSSFSolverIter->imageData();}
     return newImage;
 }
 
@@ -121,7 +118,10 @@ bool LBMRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) LBMSolver->getImage(img);
+    if (newImage) 
+        if (!view_density) { *(float**)imgPtr = LBMSolver->imageData(); }
+        else { *(float**)imgPtr = LBMSolver->mappedRhoData(); }
+        
     return newImage;
 }
 
@@ -148,28 +148,13 @@ bool JSSF3DRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) JSSFSolver3D->getImage(img);
+    if (newImage) { *(float**)imgPtr = JSSFSolver3D->imageData();}
     return newImage;
 }
 
 bool renderSims()
 {
-    static float currentTime = 0;
-    static float oldTime = 0;
-    static float oldRenderTime = 0;
     static std::future<bool> future; 
-
-    static bool firstCall = true;
-    if (firstCall)
-    {
-        renderer2D.init();
-        renderer2D.setBounds(L,L);
-        renderer2D.addTexture(N,N,"background");
-        img.resize(N*N*3);
-        img.setZero();
-        renderer2D.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img.data());
-        firstCall = false;
-    }
 
     // here we start the async method
     // outside of the frame rate if statement
@@ -209,7 +194,7 @@ bool renderSims()
 
     currentTime = glfwGetTime();
 
-    if (!isUpdating && (currentTime - oldTime > dt))
+    if ( !isUpdating && (max_fps == 0 || currentTime - oldSimTime > 1/max_fps) )
     {        
         switch (currentSolver)
         {
@@ -219,7 +204,7 @@ bool renderSims()
                 isCalcFrame = false;
                 future.get();
             }
-            fps = 0;
+            sim_fps = 0;
             break;
 
         // 2D
@@ -229,9 +214,10 @@ bool renderSims()
             if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;
-                fps = 1/(currentTime - oldTime);
-                oldTime = glfwGetTime();  
-                if (future.get()) renderer2D.getTexture("background")->loadPixels( GL_RGB, GL_FLOAT, img.data());
+                sim_fps = 1/(currentTime - oldSimTime);
+                oldSimTime = glfwGetTime();  
+                if (future.get()) 
+                    renderer2D.getTexture("background")->loadPixels( GL_RGB, GL_FLOAT, img);
             }
             break;
 
@@ -240,8 +226,8 @@ bool renderSims()
             if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;
-                fps = 1/(currentTime - oldTime);
-                oldTime = glfwGetTime();  
+                sim_fps = 1/(currentTime - oldSimTime);
+                oldSimTime = glfwGetTime();  
                 future.get();
             }
             break;
@@ -251,24 +237,23 @@ bool renderSims()
     currentTime = glfwGetTime();
 
     bool frameRendered = false;
-    double maxfps = 240;
     switch (currentRenderer)
     {
     case NONE:
-        if (currentTime - oldRenderTime > 1/maxfps)
+        if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
         {
             frameRendered = true;
-            oldRenderTime = glfwGetTime();
+            oldRefreshTime = glfwGetTime();
         }
         break;
     
     // 2D
     case DIM2:
-        if (currentTime - oldRenderTime > 1/maxfps)
+        if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
         {
             renderer2D.drawScene();
             frameRendered = true;
-            oldRenderTime = glfwGetTime();
+            oldRefreshTime = glfwGetTime();
         }
         break;
     }

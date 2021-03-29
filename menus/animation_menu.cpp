@@ -1,5 +1,5 @@
 #include "animation_menu.h"
-#include "global_vars.h"
+#include "../global_vars.h"
 
 #include <string>
 #include <vector>
@@ -29,9 +29,9 @@ void openVDBSave(int& cache_frame, std::string cache_loc, std::string cache_name
         for (int j = 0; j < N; j++)
             for (int k = 0; k < N; k++)
             {
-                color(0) = img(N*3*N*k + N*3*j + 3*i + 0);
-                color(1) = img(N*3*N*k + N*3*j + 3*i + 1);
-                color(2) = img(N*3*N*k + N*3*j + 3*i + 2);
+                color(0) = img[N*N*3*k + N*3*j + 3*i + 0];
+                color(1) = img[N*N*3*k + N*3*j + 3*i + 1];
+                color(2) = img[N*N*3*k + N*3*j + 3*i + 2];
 
                 float density = color.norm()/std::sqrt(3);
 
@@ -78,19 +78,19 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
     switch (currentSolver)
     {
     case JSSF:
-        JSSFSolver->getImage(img);
+        img = JSSFSolver->imageData();
         break;
 
     case JSSFIter:
-        JSSFSolverIter->getImage(img);
+        img = JSSFSolverIter->imageData();
         break;
 
     case LBM:
-        LBMSolver->getImage(img);
+        img = LBMSolver->imageData();
         break;
 
     case JSSF3D:
-        JSSFSolver3D->getImage(img);
+        img = JSSFSolver3D->imageData();
         break;
     }
 
@@ -101,7 +101,8 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
     switch (currentRenderer)
     {
     case DIM2:
-        img8bit = (img * 255).template cast <unsigned char>();
+        for (int i = 0; i < 3*N*N; i++)
+            img8bit[i] = img[i] * 255;
         stbi_flip_vertically_on_write(1);
         stbi_write_png(full_file_path.c_str(), N, N, 3, img8bit.data(), 3*N);
         stbi_flip_vertically_on_write(flipBoolTmp);
@@ -200,7 +201,7 @@ void doAnimationMenu(bool& checkDone, bool& acknowledgeFailedStep)
     
     if (!checkDone && (checkDone = ImGui::Button("Reset"))) isResetting = true;
 
-    ImGui::TextUnformatted(("FPS: " + std::to_string(std::round(fps*1000)/1000.)).c_str());
+    ImGui::TextUnformatted(("FPS: " + std::to_string(std::round(sim_fps*1000)/1000.)).c_str());
 
 }
 

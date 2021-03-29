@@ -14,7 +14,6 @@ void doLBMMenu()
     static float rho0 = 1.3, visc = 1e-4, uref = 1;
     static int iter_per_frame = 1;
     static float rhobounds[2]{-1, -1};
-    static bool view_density = false;
 
     if (updateSolver && !isCalcFrame)
     {
@@ -27,8 +26,7 @@ void doLBMMenu()
         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
         {
             future.get();
-            LBMSolver->setDensityVisBounds(rhobounds[0], rhobounds[1]);
-            LBMSolver->enableDensityViewMode(view_density);
+            LBMSolver->setDensityMapping(rhobounds[0], rhobounds[1]);
             isUpdating = false;
             updateSolver = false;
         }
@@ -63,20 +61,24 @@ void doLBMMenu()
             ImGui::EndCombo();
         }
         isChanged |= ImGui::InputInt("Iterations Per Frame", &(iter_per_frame));
+        
         std::string sim_time_step = "Time step (s): ";
-        sim_time_step += std::to_string(LBMSolver->dt);
+        sim_time_step += std::to_string(LBMSolver->TimeStep());
         ImGui::TextUnformatted(sim_time_step.c_str());
+        
+        std::string sound_speed = "Speed of Sound(m/s): ";
+        sound_speed += std::to_string(LBMSolver->soundSpeed());
+        ImGui::TextUnformatted(sound_speed.c_str());
 
-        if ( ImGui::Checkbox("View Density", &view_density) )
-            LBMSolver->enableDensityViewMode(view_density);
+        if ( ImGui::Checkbox("View Density", &view_density) );
 
         if ( view_density ){
 
-            if ( ImGui::InputFloat2("Density Visualization Bounds", rhobounds) )
-                LBMSolver->setDensityVisBounds(rhobounds[0], rhobounds[1]);
+            if ( ImGui::InputFloat2("Density Mapping", rhobounds) )
+                LBMSolver->setDensityMapping(rhobounds[0], rhobounds[1]);
             std::string current_min_max_rho = "Current min/max density: ";
             float minmaxrho[2];
-            LBMSolver->getCurrentDensityBounds(minmaxrho);
+            LBMSolver->densityExtrema(minmaxrho);
             current_min_max_rho += std::to_string(minmaxrho[0]);
             current_min_max_rho += "/";
             current_min_max_rho += std::to_string(minmaxrho[1]);

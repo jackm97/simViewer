@@ -1,5 +1,5 @@
 #include "forces_menu.h"
-#include "global_vars.h"
+#include "../global_vars.h"
 
 
 
@@ -54,4 +54,14 @@ void doForceWindow()
         }
     }
     ImGui::End();
+
+    if (forces.size() > 0 && currentSolver == LBM)
+    {
+        float Hz = 1000;
+        float w = 2 * M_PI * Hz;
+        float force = 200;
+        forces[0].force[0] = force * std::sin(w * LBMSolver->Time());
+        if (std::cos(w * LBMSolver->Time()) < 0)
+            forces[0].force[0] = 0;
+    }
 }

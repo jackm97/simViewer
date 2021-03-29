@@ -10,7 +10,7 @@ void doJSSFMenu()
     static int currentBC = 0;
     static std::future<void> future;
 
-    static float visc = 0, diff = 0, diss = 0;
+    static float dt = .1, visc = 0, diff = 0, diss = 0;
     static jfs::BoundType fluid_btype = jfs::ZERO;
 
     if (updateSolver && !isCalcFrame)
@@ -40,6 +40,7 @@ void doJSSFMenu()
         isChanged |= ImGui::InputFloat("Viscosity", &(visc));
         isChanged |= ImGui::InputFloat("Diffusion", &(diff));
         isChanged |= ImGui::InputFloat("Dissipation", &(diss));
+        isChanged |= ImGui::InputFloat("Time Step(s)", &(dt));
         if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
         {
             for (int bc=0; bc < 2; bc++)
