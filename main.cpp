@@ -36,6 +36,7 @@ float L=1.; // grid length
 float max_fps = 60; // max sim_fps, if 0, uncapped
 const float screen_refresh_rate = 240; // to limit load on GPU
 float oldSimTime = 0;
+float oldImGuiTime = 0;
 float oldRefreshTime = 0;
 float currentTime = 0;
 
@@ -153,28 +154,36 @@ int main(int, char**) {
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        currentTime = glfwGetTime();
 
-        doAnimationWindow();
-        doMainWindow();
-        doForceWindow();
-        doSourceWindow();
-        doPressureWindow();
+        if ((currentTime - oldImGuiTime) > 1/screen_refresh_rate)
+        {
+            oldImGuiTime = glfwGetTime();
+            
+            // UI Stuff
+            glfwMakeContextCurrent(menuWindow);
+            
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            doAnimationWindow();
+            doMainWindow();
+            doForceWindow();
+            doSourceWindow();
+            doPressureWindow();
 
         currentTime = glfwGetTime();
 
         // UI Stuff
         glfwMakeContextCurrent(menuWindow);
-        ImGui::Render();    
-        
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
+            ImGui::Render();    
+            
+            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
 
         if ((currentTime - oldRefreshTime) > 1/screen_refresh_rate)
-        {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             
             glfwSwapBuffers(menuWindow);
