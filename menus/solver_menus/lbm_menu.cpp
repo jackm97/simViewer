@@ -29,6 +29,11 @@ void doLBMMenu()
             LBMSolver->setDensityMapping(rhobounds[0], rhobounds[1]);
             isUpdating = false;
             updateSolver = false;
+
+            if (grid_smoke2d == NULL)
+                grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, LBMSolver->TimeStep() * iter_per_frame, smoke_diss);
+            else
+                grid_smoke3d->initialize(N, L, fluid_btype, LBMSolver->TimeStep() * iter_per_frame, smoke_diss);
         }
     }
     if (updateSolver)

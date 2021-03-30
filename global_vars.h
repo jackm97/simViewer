@@ -83,7 +83,13 @@ extern jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
 extern jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 
+// fluid visualization
 extern bool view_density;
+extern float smoke_diss;
+#include <jfs/visualization/grid_smoke2d.h>
+extern jfs::gridSmoke2D* grid_smoke2d;
+#include <jfs/visualization/grid_smoke3d.h>
+extern jfs::gridSmoke3D* grid_smoke3d;
 
 
 // Sources, Forces and Points

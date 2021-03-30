@@ -5,6 +5,7 @@ void doSourceWindow()
 {
     static std::vector<std::string> sourceList = {""};
     static int currentSource = 0;
+    static float diss = smoke_diss;
 
     if (currentRenderer == NONE)
         return;
@@ -49,6 +50,16 @@ void doSourceWindow()
             sourceList.erase(sourceList.end());
             sources.erase(sources.begin() + currentSource - 1);
             currentSource-=1;
+        }
+        ImGui::InputFloat("Dissipation", &diss);
+        if (diss != smoke_diss)
+        {
+            if (ImGui::Button("Update Smoke"))
+            {
+                smoke_diss = diss;
+                updateRenderer = true;
+                updateSolver = true;
+            }
         }
     }
     ImGui::End();

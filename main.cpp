@@ -74,7 +74,11 @@ jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
 jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 
-bool view_density = false;
+// fluid visualization
+bool view_density;
+float smoke_diss = 0;
+jfs::gridSmoke2D* grid_smoke2d = NULL;
+jfs::gridSmoke3D* grid_smoke3d = NULL;
 
 
 // Sources, Forces and Points
@@ -157,7 +161,7 @@ int main(int, char**) {
 
         currentTime = glfwGetTime();
 
-        if ((currentTime - oldImGuiTime) > 1/screen_refresh_rate)
+        if (true)
         {
             oldImGuiTime = glfwGetTime();
             

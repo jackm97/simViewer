@@ -54,6 +54,14 @@ void handleMem(SOLVER_TYPE newsolver)
         break;
     }
     updateSolver = true;
+    
+    if (grid_smoke2d != NULL)
+        delete grid_smoke2d;
+    if (grid_smoke3d != NULL)
+        delete grid_smoke3d;
+
+    grid_smoke2d = NULL;
+    grid_smoke3d = NULL;
 }
 
 void doSolverMenu()

@@ -78,19 +78,13 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
     switch (currentSolver)
     {
     case JSSF:
-        img = JSSFSolver->imageData();
-        break;
-
     case JSSFIter:
-        img = JSSFSolverIter->imageData();
-        break;
-
     case LBM:
-        img = LBMSolver->imageData();
+        img = grid_smoke2d->smokeData();
         break;
 
     case JSSF3D:
-        img = JSSFSolver3D->imageData();
+        img = grid_smoke3d->smokeData();
         break;
     }
 

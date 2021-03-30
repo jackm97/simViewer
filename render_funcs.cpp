@@ -48,15 +48,17 @@ bool JSSFRender(void* imgPtr)
     if (isResetting)
     {
         JSSFSolver->resetFluid();
+        grid_smoke2d->resetSmoke();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = JSSFSolver->calcNextStep(forces,sources)) )
+        if ( !(failedStep = JSSFSolver->calcNextStep(forces)) )
         {
             nextFrame = false;
             newImage = true;
+            grid_smoke2d->updateSmoke(sources, JSSFSolver->velocityData());
         }
     }
     else if (reRender)
@@ -64,7 +66,7 @@ bool JSSFRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) { *(float**)imgPtr = JSSFSolver->imageData();}
+    if (newImage) { *(float**)imgPtr = grid_smoke2d->smokeData();}
     return newImage;
 }
 
@@ -75,15 +77,17 @@ bool JSSFIterRender(void* imgPtr)
     if (isResetting)
     {
         JSSFSolverIter->resetFluid();
+        grid_smoke2d->resetSmoke();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = JSSFSolverIter->calcNextStep(forces,sources)) )
+        if ( !(failedStep = JSSFSolverIter->calcNextStep(forces)) )
         {
             nextFrame = false;
             newImage = true;
+            grid_smoke2d->updateSmoke(sources, JSSFSolverIter->velocityData());
         }
     }
     else if (reRender)
@@ -91,7 +95,7 @@ bool JSSFIterRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) { *(float**)imgPtr = JSSFSolverIter->imageData();}
+    if (newImage) { *(float**)imgPtr = grid_smoke2d->smokeData();}
     return newImage;
 }
 
@@ -102,15 +106,17 @@ bool LBMRender(void* imgPtr)
     if (isResetting)
     {
         LBMSolver->resetFluid();
+        grid_smoke2d->resetSmoke();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = LBMSolver->calcNextStep(forces,sources)) )
+        if ( !(failedStep = LBMSolver->calcNextStep(forces)) )
         {
             nextFrame = false;
             newImage = true;
+            grid_smoke2d->updateSmoke(sources, LBMSolver->velocityData());
         }
     }
     else if (reRender)
@@ -119,7 +125,7 @@ bool LBMRender(void* imgPtr)
         newImage = true;
     }
     if (newImage) 
-        if (!view_density) { *(float**)imgPtr = LBMSolver->imageData(); }
+        if (!view_density) { *(float**)imgPtr = grid_smoke2d->smokeData(); }
         else { *(float**)imgPtr = LBMSolver->mappedRhoData(); }
         
     return newImage;
@@ -132,15 +138,17 @@ bool JSSF3DRender(void* imgPtr)
     if (isResetting)
     {
         JSSFSolver3D->resetFluid();
+        grid_smoke3d->resetSmoke();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = JSSFSolver3D->calcNextStep(forces,sources)) )
+        if ( !(failedStep = JSSFSolver3D->calcNextStep(forces)) )
         {
             nextFrame = false;
             newImage = true;
+            grid_smoke3d->updateSmoke(sources, JSSFSolver3D->velocityData());
         }
     }
     else if (reRender)
@@ -148,7 +156,7 @@ bool JSSF3DRender(void* imgPtr)
         reRender = false;
         newImage = true;
     }
-    if (newImage) { *(float**)imgPtr = JSSFSolver3D->imageData();}
+    if (newImage) { *(float**)imgPtr = grid_smoke2d->smokeData();}
     return newImage;
 }
 

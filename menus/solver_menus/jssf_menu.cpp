@@ -10,14 +10,19 @@ void doJSSFMenu()
     static int currentBC = 0;
     static std::future<void> future;
 
-    static float dt = .1, visc = 0, diff = 0, diss = 0;
+    static float dt = .1, visc = 0;
     static jfs::BoundType fluid_btype = jfs::ZERO;
 
     if (updateSolver && !isCalcFrame)
     {
+        if (grid_smoke2d == NULL)
+            grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, dt, smoke_diss);
+        else
+            grid_smoke2d->initialize(N, L, fluid_btype, dt, smoke_diss);
+            
         if (!isUpdating)
         {
-            auto initLambda = [](){JSSFSolver->initialize(N,L,fluid_btype,dt,visc,diff,diss);};
+            auto initLambda = [](){JSSFSolver->initialize(N, L, fluid_btype, dt, visc);};
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }
@@ -38,8 +43,6 @@ void doJSSFMenu()
     if (!isUpdating)
     {
         isChanged |= ImGui::InputFloat("Viscosity", &(visc));
-        isChanged |= ImGui::InputFloat("Diffusion", &(diff));
-        isChanged |= ImGui::InputFloat("Dissipation", &(diss));
         isChanged |= ImGui::InputFloat("Time Step(s)", &(dt));
         if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
         {
