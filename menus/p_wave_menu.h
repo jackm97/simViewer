@@ -3,6 +3,4 @@
 
 void doPressureWindow();
 
-void applyPressureWaves();
-
 #endif

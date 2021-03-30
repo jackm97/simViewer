@@ -3,4 +3,6 @@
 
 void doAnimationWindow();
 
+void updateCache();
+
 #endif

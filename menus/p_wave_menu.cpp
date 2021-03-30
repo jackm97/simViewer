@@ -81,10 +81,7 @@ void doPressureWindow()
         }
     }
     ImGui::End();
-}
-
-void applyPressureWaves()
-{
+    
     if (currentSolver == LBM && (isAnimating || nextFrame) && !isCalcFrame)
         for (int p = 0; p < p_waves.size(); p++) doPressureWave(p_waves[p]);
 }

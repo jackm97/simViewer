@@ -34,7 +34,7 @@ float L=1.; // grid length
 
 // Rendering
 float max_fps = 60; // max sim_fps, if 0, uncapped
-const float screen_refresh_rate = 240; // to limit load on GPU
+const float screen_refresh_rate = 60; // to limit load on GPU
 float oldSimTime = 0;
 float oldImGuiTime = 0;
 float oldRefreshTime = 0;
@@ -160,36 +160,32 @@ int main(int, char**) {
         glfwPollEvents();
 
         currentTime = glfwGetTime();
+            
+        // UI Stuff
+        glfwMakeContextCurrent(menuWindow);
+        
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        doAnimationWindow();
+        doMainWindow();
+        doForceWindow();
+        doSourceWindow();
+        doPressureWindow();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());  
 
         if ( (currentTime - oldImGuiTime) > 1/screen_refresh_rate )
-        {
+        {          
             oldImGuiTime = glfwGetTime();
-            
-            // UI Stuff
-            glfwMakeContextCurrent(menuWindow);
-            
-            // Start the Dear ImGui frame
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-            
-            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            doAnimationWindow();
-            doMainWindow();
-            doForceWindow();
-            doSourceWindow();
-            doPressureWindow();
-
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            
             glfwSwapBuffers(menuWindow);
         }
-
-        // do any menu stuff that needs to run outside of render loop
-        applyPressureWaves();
         
         // Render Stuff
         glfwMakeContextCurrent(renderWindow);
@@ -203,6 +199,7 @@ int main(int, char**) {
         glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
         viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
         glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
+        
         if ( renderSims() )
             glfwSwapBuffers(renderWindow);
     }

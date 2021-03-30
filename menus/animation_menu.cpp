@@ -33,12 +33,12 @@ void openVDBSave(int& cache_frame, std::string cache_loc, std::string cache_name
                 color(1) = img[N*N*3*k + N*3*j + 3*i + 1];
                 color(2) = img[N*N*3*k + N*3*j + 3*i + 2];
 
-                float density = color.norm()/std::sqrt(3);
+                float density = color.norm();
 
                 if (density == 0)
                     continue;
                     
-                color = (1/density) * color;
+                color.normalize();
 
                 openvdb::Vec3f gridColor;
                 gridColor.x() = color(0);
@@ -95,8 +95,13 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
     switch (currentRenderer)
     {
     case DIM2:
+        img8bit.resize(3*N*N);
         for (int i = 0; i < 3*N*N; i++)
-            img8bit[i] = img[i] * 255;
+        {
+            float color_byte = img[i] * 255;
+            color_byte = (color_byte > 255) ? 255 : color_byte;
+            img8bit[i] = (unsigned char) color_byte;
+        }
         stbi_flip_vertically_on_write(1);
         stbi_write_png(full_file_path.c_str(), N, N, 3, img8bit.data(), 3*N);
         stbi_flip_vertically_on_write(flipBoolTmp);
@@ -197,6 +202,8 @@ void doAnimationMenu(bool& checkDone, bool& acknowledgeFailedStep)
 
     ImGui::TextUnformatted(("FPS: " + std::to_string(std::round(sim_fps*1000)/1000.)).c_str());
 
+    if (nextFrame)
+        oldSimTime = glfwGetTime();
 }
 
 void doAnimationWindow()
@@ -247,14 +254,14 @@ void doAnimationWindow()
         }
 
         doAnimationMenu(checkDone, acknowledgeFailedStep);
-
-        if (isResetting)
-            cache_frame = 0;
-
-        if (isCache && (isAnimating || checkDone) && !isCalcFrame)
-            cacheFrame(cache_frame, cache_loc, cache_name);
     }
     ImGui::End();
+
+    if (isResetting)
+        cache_frame = 0;
+
+    if (isCache && (isAnimating || checkDone) && !isCalcFrame)
+        cacheFrame(cache_frame, cache_loc, cache_name);
 
     // display
     if (!isUpdating && !isAnimating && !nextFrame && fileDialog.Display("ChooseDirDlgKey")) 

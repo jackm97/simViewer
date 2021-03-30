@@ -10,13 +10,13 @@ void doGridMenu()
 {
     static bool isChanged = false;
     static bool updateGrid = false;
-    static float fps_tmp = max_fps; //dtTemp is used instead of dt because dt is used outside of just the solvers
+    static int fps_tmp = (int) max_fps; 
     static std::future<void> future;
 
     // update the grid
     if (updateGrid && !isCalcFrame)
     {
-        max_fps = fps_tmp;
+        max_fps = (float) fps_tmp;
         updateSolver = true;
         updateGrid = false;
         updateRenderer = true;
@@ -33,7 +33,7 @@ void doGridMenu()
     {
         isChanged |= ImGui::InputInt("Grid Size (>0)", (int*) &N);
         isChanged |= ImGui::InputFloat("Grid Length (>0)", &L);
-        isChanged |= ImGui::InputFloat("Maximum Simulation FPS(0 is uncapped)", &fps_tmp);
+        isChanged |= ImGui::InputInt("Maximum Simulation FPS(0 is uncapped)", &fps_tmp);
 
         // if something is changed
         // add button to update grid
