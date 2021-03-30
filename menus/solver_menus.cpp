@@ -111,7 +111,7 @@ void doSolverMenu()
         {
             future.get();
             currentSolver = (SOLVER_TYPE) currentSolverTmp;
-            updateRenderer();
+            updateRenderer = true;
             isUpdating = false;
             isChanged = false;
         }

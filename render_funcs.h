@@ -1,7 +1,7 @@
 #ifndef RENDERFUNCS_H
 #define RENDERFUNCS_H
 
-void updateRenderer();
+void doRendererUpdate();
 
 bool JSSFRender(void* imgPtr);
 

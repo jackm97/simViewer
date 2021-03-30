@@ -58,6 +58,7 @@ glr::sceneViewer2D renderer2D;
 glr::sceneViewer renderer3D;
 
 RENDER_TYPE currentRenderer = NONE;
+bool updateRenderer = false;
 
 // Solver Stuff
 const int numSolvers = 5;
@@ -167,6 +168,9 @@ int main(int, char**) {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
+            
+            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             doAnimationWindow();
             doMainWindow();
@@ -182,21 +186,17 @@ int main(int, char**) {
         
         // Render Stuff
         glfwMakeContextCurrent(renderWindow);
-        
-        if ((currentTime - oldRefreshTime) > 1/screen_refresh_rate)
-        {
-            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
+
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
             
-            // viewport stuff
-            int viewPortSize;
-            int display_w, display_h;
-            glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
-            viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
-            glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
-        }
-        
-        if (renderSims())
+        // viewport stuff
+        int viewPortSize;
+        int display_w, display_h;
+        glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
+        viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
+        glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
+        if ( renderSims() )
             glfwSwapBuffers(renderWindow);
     }
 

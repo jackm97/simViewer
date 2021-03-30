@@ -19,7 +19,7 @@ void doGridMenu()
         max_fps = fps_tmp;
         updateSolver = true;
         updateGrid = false;
-        updateRenderer();
+        updateRenderer = true;
     }
     // if (updateGrid)
     // {

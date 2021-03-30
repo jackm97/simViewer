@@ -3,7 +3,7 @@
 
 #include <future>
 
-void updateRenderer()
+void doRendererUpdate()
 {
     switch (currentSolver)
     {
@@ -156,6 +156,10 @@ bool renderSims()
 {
     static std::future<bool> future; 
 
+    if (updateRenderer)
+        doRendererUpdate();
+    updateRenderer = false;
+
     // here we start the async method
     // outside of the frame rate if statement
     // so that the overhead of starting 
@@ -251,9 +255,9 @@ bool renderSims()
     case DIM2:
         if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
         {
+            oldRefreshTime = glfwGetTime();
             renderer2D.drawScene();
             frameRendered = true;
-            oldRefreshTime = glfwGetTime();
         }
         break;
     }

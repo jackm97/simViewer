@@ -55,6 +55,7 @@ enum RENDER_TYPE : unsigned int{
 };
 
 extern RENDER_TYPE currentRenderer;
+extern bool updateRenderer;
 
 // Solver Stuff
 #include <jfs/JSSFSolver.h>
