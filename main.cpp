@@ -174,16 +174,7 @@ int main(int, char**) {
             doSourceWindow();
             doPressureWindow();
 
-        currentTime = glfwGetTime();
-
-        // UI Stuff
-        glfwMakeContextCurrent(menuWindow);
-            ImGui::Render();    
-            
-            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-        if ((currentTime - oldRefreshTime) > 1/screen_refresh_rate)
+            ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             
             glfwSwapBuffers(menuWindow);
