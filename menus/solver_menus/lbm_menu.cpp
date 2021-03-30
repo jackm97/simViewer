@@ -33,7 +33,7 @@ void doLBMMenu()
             if (grid_smoke2d == NULL)
                 grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, LBMSolver->TimeStep() * iter_per_frame, smoke_diss);
             else
-                grid_smoke3d->initialize(N, L, fluid_btype, LBMSolver->TimeStep() * iter_per_frame, smoke_diss);
+                grid_smoke2d->initialize(N, L, fluid_btype, LBMSolver->TimeStep() * iter_per_frame, smoke_diss);
         }
     }
     if (updateSolver)
@@ -46,7 +46,7 @@ void doLBMMenu()
     if (!isUpdating)
     {
         isChanged |= ImGui::InputFloat("Density", &(rho0));
-        isChanged |= ImGui::InputFloat("Viscosity", &(visc),0,0,"%.0e");
+        isChanged |= ImGui::InputFloat("Viscosity", &(visc), 0, 0, "%.0e");
         isChanged |= ImGui::InputFloat("Reference Speed", &(uref));
         if (ImGui::BeginCombo("Boundary Type", bcTypes[currentBC]))
         {
