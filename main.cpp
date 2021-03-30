@@ -161,7 +161,7 @@ int main(int, char**) {
 
         currentTime = glfwGetTime();
 
-        if (true)
+        if ( (currentTime - oldImGuiTime) > 1/screen_refresh_rate )
         {
             oldImGuiTime = glfwGetTime();
             
@@ -187,6 +187,9 @@ int main(int, char**) {
             
             glfwSwapBuffers(menuWindow);
         }
+
+        // do any menu stuff that needs to run outside of render loop
+        applyPressureWaves();
         
         // Render Stuff
         glfwMakeContextCurrent(renderWindow);
