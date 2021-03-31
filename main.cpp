@@ -34,7 +34,7 @@ float L=1.; // grid length
 
 // Rendering
 float max_fps = 60; // max sim_fps, if 0, uncapped
-const float screen_refresh_rate = 60; // to limit load on GPU
+const float screen_refresh_rate = 240; // to limit load on GPU
 float oldSimTime = 0;
 float oldImGuiTime = 0;
 float oldRefreshTime = 0;
@@ -200,8 +200,13 @@ int main(int, char**) {
         viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
         glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
         
-        if ( renderSims() )
+        renderSims();
+        
+        if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
+        {
+            oldRefreshTime = glfwGetTime();
             glfwSwapBuffers(renderWindow);
+        }
     }
 
     // Imgui Cleanup

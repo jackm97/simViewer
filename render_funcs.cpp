@@ -204,8 +204,6 @@ bool renderSims()
         }  
     }
 
-    currentTime = glfwGetTime();
-
     if ( !isUpdating && (max_fps == 0 || currentTime - oldSimTime > 1/max_fps) )
     {        
         switch (currentSolver)
@@ -246,27 +244,17 @@ bool renderSims()
         }    
     }
 
-    currentTime = glfwGetTime();
-
     bool frameRendered = false;
     switch (currentRenderer)
     {
     case NONE:
-        if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
-        {
-            frameRendered = true;
-            oldRefreshTime = glfwGetTime();
-        }
+        frameRendered = true;
         break;
     
     // 2D
     case DIM2:
-        if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
-        {
-            oldRefreshTime = glfwGetTime();
-            renderer2D.drawScene();
-            frameRendered = true;
-        }
+        renderer2D.drawScene();
+        frameRendered = true;
         break;
     }
 
