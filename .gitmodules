@@ -13,3 +13,6 @@
 [submodule "extern/ImGuiFileDialog"]
 	path = extern/ImGuiFileDialog
 	url = https://github.com/jackm97/ImGuiFileDialog.git
+[submodule "extern/AudioFile"]
+	path = extern/AudioFile
+	url = https://github.com/adamstark/AudioFile.git
