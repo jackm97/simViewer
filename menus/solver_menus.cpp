@@ -47,7 +47,7 @@ void handleMem(SOLVER_TYPE newsolver)
         JSSFSolverIter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
         break;
     case LBM:
-        LBMSolver = new jfs::LBMSolver (1, L, jfs::ZERO, 1);
+        LBMSolver = new jfs::CudaLBMSolver (1, L, jfs::ZERO, 1);
         break;
     case JSSF3D:
         JSSFSolver3D = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);

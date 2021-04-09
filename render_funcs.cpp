@@ -105,18 +105,19 @@ bool LBMRender(void* imgPtr)
     bool newImage = false;
     if (isResetting)
     {
-        LBMSolver->resetFluid();
+        LBMSolver->ResetFluid();
         grid_smoke2d->resetSmoke();
         isResetting = false;
         newImage = true;
     }
     else if (isAnimating || nextFrame)
     {
-        if ( !(failedStep = LBMSolver->calcNextStep(forces)) )
+        if ( !( failedStep = LBMSolver->CalcNextStep(forces) ) );
+        if (!failedStep && iter == iter_per_frame)
         {
             nextFrame = false;
             newImage = true;
-            grid_smoke2d->updateSmoke(sources, LBMSolver->velocityData());
+            grid_smoke2d->updateSmoke(sources, LBMSolver->VelocityData());
         }
     }
     else if (reRender)
@@ -126,7 +127,7 @@ bool LBMRender(void* imgPtr)
     }
     if (newImage) 
         if (!view_density) { *(float**)imgPtr = grid_smoke2d->smokeData(); }
-        else { *(float**)imgPtr = LBMSolver->mappedRhoData(); }
+        else { *(float**)imgPtr = LBMSolver->MappedRhoData(); }
         
     return newImage;
 }
@@ -205,7 +206,7 @@ bool renderSims()
     }
 
     if ( !isUpdating && (max_fps == 0 || currentTime - oldSimTime > 1/max_fps) )
-    {        
+    {
         switch (currentSolver)
         {
         case EMPTY:
@@ -222,12 +223,16 @@ bool renderSims()
         case JSSFIter:
         case LBM:
             if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
-            {
+            { 
                 isCalcFrame = false;
-                sim_fps = 1/(currentTime - oldSimTime);
-                oldSimTime = glfwGetTime();  
-                if (future.get()) 
+                if (future.get() && iter == iter_per_frame)
+                { 
+                    sim_fps = 1/(currentTime - oldSimTime);
+                    oldSimTime = glfwGetTime(); 
                     renderer2D.getTexture("background")->loadPixels( GL_RGB, GL_FLOAT, img);
+                    iter = 0;
+                }
+                iter++;
             }
             break;
 
@@ -236,9 +241,13 @@ bool renderSims()
             if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
                 isCalcFrame = false;
-                sim_fps = 1/(currentTime - oldSimTime);
-                oldSimTime = glfwGetTime();  
-                future.get();
+                if (future.get() && iter == iter_per_frame)
+                { 
+                    sim_fps = 1/(currentTime - oldSimTime);
+                    oldSimTime = glfwGetTime(); 
+                    iter = 0;
+                }
+                iter++;
             }
             break;
         }    

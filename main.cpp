@@ -14,6 +14,7 @@
 #include "./menus/sources_menu.h"
 #include "./menus/p_wave_menu.h"
 #include "./menus/grid_menu.h"
+#include "./menus/audio_menu.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -42,6 +43,8 @@ float currentTime = 0;
 
 // fps counter
 float sim_fps;
+int iter_per_frame = 1;
+int iter = 0;
 
 // sim results
 float* img;
@@ -70,7 +73,7 @@ bool updateSolver = false;
 //      2D
 jfs::JSSFSolver<>* JSSFSolver; //(1,L,jfs::ZERO,dt);
 jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,dt);
-jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
+jfs::CudaLBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
 jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 
@@ -177,6 +180,7 @@ int main(int, char**) {
         doForceWindow();
         doSourceWindow();
         doPressureWindow();
+        doAudioMenu();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());  

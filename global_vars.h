@@ -31,6 +31,8 @@ extern float currentTime;
 
 // fps counter
 extern float sim_fps;
+extern int iter_per_frame;
+extern int iter;
 
 // sim results
 extern float* img;
@@ -61,6 +63,7 @@ extern bool updateRenderer;
 #include <jfs/JSSFSolver.h>
 #include <jfs/JSSFSolver3D.h>
 #include <jfs/LBMSolver.h>
+#include <jfs/cuda/lbm_solver_cuda.h>
 
 enum SOLVER_TYPE : unsigned int{
     EMPTY = 0,
@@ -79,7 +82,7 @@ extern bool updateSolver;
 //      2D
 extern jfs::JSSFSolver<>* JSSFSolver; //(1,L,jfs::ZERO,dt);
 extern jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,dt);
-extern jfs::LBMSolver* LBMSolver; //(1,L,1/dt);
+extern jfs::CudaLBMSolver* LBMSolver; //(1,L,1/dt);
 //      3D
 extern jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
 

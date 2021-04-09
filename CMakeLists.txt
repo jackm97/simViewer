@@ -136,6 +136,7 @@ add_executable(simViewer    main.cpp
                             menus/forces_menu.cpp
                             menus/grid_menu.cpp
                             menus/p_wave_menu.cpp
+                            menus/audio_menu.cpp
                             menus/solver_menus/jssf_menu.cpp
                             menus/solver_menus/jssf_iter_menu.cpp
                             menus/solver_menus/lbm_menu.cpp
