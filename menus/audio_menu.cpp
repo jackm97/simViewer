@@ -16,6 +16,8 @@ void doAudioMenu()
     static bool do_sound = false;
     static bool save_sound = false;
 
+    static float signal_amp = 50.f;
+
     static bool is_saving = false;
 
     if (currentSolver != LBM)
@@ -33,19 +35,24 @@ void doAudioMenu()
 
         if (save_sound)
         {
+            ImGui::InputFloat("Signal Amplification", &signal_amp);
             if (ImGui::Button("Finish Sound"))
             {
+                for (float & s : audio_file.samples[0])
+                    s *= signal_amp;
                 audio_file.setAudioBuffer( buffer );
                 audio_file.setBitDepth(24);
-                audio_file.setSampleRate( 1 / LBMSolver->TimeStep() );
+                audio_file.setSampleRate(1 / lbm_solver->TimeStep() );
                 audio_file.save("./test.wav");
                 printf("%i\n", audio_file.getSampleRate());
-                printf("%i\n", audio_file.samples[0].size());
+                printf("%zu\n", audio_file.samples[0].size());
+                for (float & s : audio_file.samples[0])
+                    s /= signal_amp;
             }
         }
     }
     std::string sim_time = "Current Simulation Time(s): ";
-    sim_time += std::to_string(LBMSolver->Time());
+    sim_time += std::to_string(lbm_solver->Time());
     ImGui::TextUnformatted(sim_time.c_str());
     ImGui::End();
 
@@ -53,19 +60,19 @@ void doAudioMenu()
     float w = 2 * M_PI * Hz;
     if (do_sound && (isAnimating || nextFrame) && !isCalcFrame )
     {
-        int idx = .5 * L / LBMSolver->DeltaX();
+        int idx = .5 * L / lbm_solver->DeltaX();
         int range = .02 * N;
         // float ux = sound_amp * ( std::sin(w * LBMSolver->Time()) );
-        int n_sample = audio_file_play.getSampleRate() * LBMSolver->Time();
+        int n_sample = audio_file_play.getSampleRate() * lbm_solver->Time();
         if (n_sample < audio_file_play.samples[0].size())
         {
             float sample = audio_file_play.samples[0][n_sample];
             float ux = sound_amp * sample;
-            LBMSolver->ForceVelocity(idx, idx, ux, 0);
+            lbm_solver->ForceVelocity(idx, idx, ux, 0);
             for (int i = 1; i < range; i++)
             {
-                LBMSolver->ForceVelocity(idx, idx + i, ux, 0);
-                LBMSolver->ForceVelocity(idx, idx - i, ux, 0);
+                lbm_solver->ForceVelocity(idx, idx + i, ux, 0);
+                lbm_solver->ForceVelocity(idx, idx - i, ux, 0);
             }
         }
     }
@@ -75,14 +82,14 @@ void doAudioMenu()
 
     static int current_sample_count = 0;
     float sample_rate = 48000;
-    if ( is_saving && !isCalcFrame )
+    if ( is_saving && !isCalcFrame && iter == iter_per_frame)
     {
         if ( true)
         {
-            float* rho_field = LBMSolver->RhoData();
-            int idx = .8 * L / LBMSolver->DeltaX();
+            float* rho_field = lbm_solver->RhoData();
+            int idx = .8 * L / lbm_solver->DeltaX();
             float rho = rho_field[N*0 + idx];
-            float sample = 50 * (rho - 1.3);
+            float sample = (rho - 1.3);
             
             // while (sample_rate * LBMSolver->Time() > current_sample_count)
             // {

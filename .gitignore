@@ -45,3 +45,6 @@ build/
 
 #imgui init files
 imgui.ini
+/cmake-build-release/
+/cmake-build-debug/
+/.idea/

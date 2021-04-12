@@ -12,16 +12,16 @@ void releaseMem()
     switch (currentSolver)
     {
     case JSSF:
-        delete JSSFSolver;
+        delete jssf_solver;
         break;
     case JSSFIter:
-        delete JSSFSolverIter;
+        delete jssf_solver_iter;
         break;
     case LBM:
-        delete LBMSolver;
+        delete lbm_solver;
         break;
     case JSSF3D:
-        delete JSSFSolver3D;
+        delete jssf_solver_3d;
         break;
     }  
 }
@@ -41,16 +41,16 @@ void handleMem(SOLVER_TYPE newsolver)
     switch (newsolver)
     {
     case JSSF:
-        JSSFSolver = new jfs::JSSFSolver<>(1, L, jfs::ZERO, .1);
+        jssf_solver = new jfs::JSSFSolver<>(1, L, jfs::ZERO, .1);
         break;
     case JSSFIter:
-        JSSFSolverIter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
+        jssf_solver_iter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
         break;
     case LBM:
-        LBMSolver = new jfs::CudaLBMSolver (1, L, jfs::ZERO, 1);
+        lbm_solver = new jfs::CudaLBMSolver (1, L, jfs::ZERO, 1);
         break;
     case JSSF3D:
-        JSSFSolver3D = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
+        jssf_solver_3d = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
         break;
     }
     updateSolver = true;

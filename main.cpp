@@ -71,17 +71,17 @@ bool updateSolver = false;
 
 // fluid solvers
 //      2D
-jfs::JSSFSolver<>* JSSFSolver; //(1,L,jfs::ZERO,dt);
-jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,dt);
-jfs::CudaLBMSolver* LBMSolver; //(1,L,1/dt);
+jfs::JSSFSolver<>* jssf_solver; //(1,L,jfs::ZERO,dt);
+jfs::JSSFSolver<jfs::iterativeSolver>* jssf_solver_iter; //(1,L,jfs::ZERO,dt);
+jfs::CudaLBMSolver* lbm_solver; //(1,L,1/dt);
 //      3D
-jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
+jfs::JSSFSolver3D<jfs::iterativeSolver>* jssf_solver_3d; //(1,L,jfs::ZERO,dt);
 
 // fluid visualization
 bool view_density;
 float smoke_diss = 0;
-jfs::gridSmoke2D* grid_smoke2d = NULL;
-jfs::gridSmoke3D* grid_smoke3d = NULL;
+jfs::gridSmoke2D* grid_smoke2d = nullptr;
+jfs::gridSmoke3D* grid_smoke3d = nullptr;
 
 
 // Sources, Forces and Points
@@ -114,13 +114,13 @@ int main(int, char**) {
 #endif
 
     // Create window with graphics context
-    menuWindow = glfwCreateWindow(1280, 720, "simViewer!", NULL, NULL);
-    if (menuWindow == NULL)
+    menuWindow = glfwCreateWindow(1280, 720, "simViewer!", nullptr, nullptr);
+    if (menuWindow == nullptr)
         return 1;
     glfwMakeContextCurrent(menuWindow);
 
-    renderWindow = glfwCreateWindow(480, 480, "Output Window", NULL, NULL);
-    if (renderWindow == NULL)
+    renderWindow = glfwCreateWindow(480, 480, "Output Window", nullptr, nullptr);
+    if (renderWindow == nullptr)
         return 1;
 
     // Initialize OpenGL loader
@@ -146,7 +146,7 @@ int main(int, char**) {
     // High-DPI
     ImGuiStyle &style = ImGui::GetStyle();
     style.ScaleAllSizes(1.5);
-    io.Fonts->AddFontFromFileTTF("../fonts/Cousine-Regular.ttf", 18.0f, NULL, NULL);
+    io.Fonts->AddFontFromFileTTF("../fonts/Cousine-Regular.ttf", 18.0f, nullptr, nullptr);
 
 
     // Initialize GLR library

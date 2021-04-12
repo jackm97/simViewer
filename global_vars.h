@@ -80,11 +80,11 @@ extern bool updateSolver;
 
 // fluid solvers
 //      2D
-extern jfs::JSSFSolver<>* JSSFSolver; //(1,L,jfs::ZERO,dt);
-extern jfs::JSSFSolver<jfs::iterativeSolver>* JSSFSolverIter; //(1,L,jfs::ZERO,dt);
-extern jfs::CudaLBMSolver* LBMSolver; //(1,L,1/dt);
+extern jfs::JSSFSolver<>* jssf_solver; //(1,L,jfs::ZERO,dt);
+extern jfs::JSSFSolver<jfs::iterativeSolver>* jssf_solver_iter; //(1,L,jfs::ZERO,dt);
+extern jfs::CudaLBMSolver* lbm_solver; //(1,L,1/dt);
 //      3D
-extern jfs::JSSFSolver3D<jfs::iterativeSolver>* JSSFSolver3D; //(1,L,jfs::ZERO,dt);
+extern jfs::JSSFSolver3D<jfs::iterativeSolver>* jssf_solver_3d; //(1,L,jfs::ZERO,dt);
 
 // fluid visualization
 extern bool view_density;

@@ -16,13 +16,13 @@ void doJSSF3DMenu()
     if (updateSolver && !isCalcFrame)
     {
         if (grid_smoke3d == NULL)
-            grid_smoke3d = new jfs::gridSmoke3D(N, L, fluid_btype, dt, smoke_diss);
+            grid_smoke3d = new jfs::gridSmoke3D(N, L, fluid_btype, iter_per_frame*dt, smoke_diss);
         else
-            grid_smoke3d->initialize(N, L, fluid_btype, dt, smoke_diss);
+            grid_smoke3d->initialize(N, L, fluid_btype, iter_per_frame*dt, smoke_diss);
 
         if (!isUpdating)
         {
-            auto initLambda = [](){JSSFSolver3D->initialize(N, L, fluid_btype, dt, visc); };
+            auto initLambda = [](){jssf_solver_3d->initialize(N, L, fluid_btype, dt, visc); };
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }

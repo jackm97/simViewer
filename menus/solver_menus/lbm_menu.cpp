@@ -18,21 +18,21 @@ void doLBMMenu()
     {
         if (!isUpdating)
         {
-            auto initLambda = [](){LBMSolver->Initialize(N, L, fluid_btype, rho0, visc, uref);};
+            auto initLambda = [](){lbm_solver->Initialize(N, L, fluid_btype, rho0, visc, uref);};
             future = std::async(std::launch::async, initLambda);
             isUpdating = true;
         }
         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
         {
             future.get();
-            LBMSolver->SetDensityMapping(rhobounds[0], rhobounds[1]);
+            lbm_solver->SetDensityMapping(rhobounds[0], rhobounds[1]);
             isUpdating = false;
             updateSolver = false;
 
             if (grid_smoke2d == NULL)
-                grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, LBMSolver->TimeStep() * iter_per_frame, smoke_diss);
+                grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, lbm_solver->TimeStep() * iter_per_frame, smoke_diss);
             else
-                grid_smoke2d->initialize(N, L, fluid_btype, LBMSolver->TimeStep(), smoke_diss);
+                grid_smoke2d->initialize(N, L, fluid_btype, iter_per_frame * lbm_solver->TimeStep(), smoke_diss);
         }
     }
     if (updateSolver)
@@ -67,11 +67,11 @@ void doLBMMenu()
         isChanged |= ImGui::InputInt("Iterations Per Frame", &(iter_per_frame));
         
         std::string sim_time_step = "Time step (s): ";
-        sim_time_step += std::to_string(LBMSolver->TimeStep());
+        sim_time_step += std::to_string(lbm_solver->TimeStep());
         ImGui::TextUnformatted(sim_time_step.c_str());
         
         std::string sound_speed = "Speed of Sound(m/s): ";
-        sound_speed += std::to_string(LBMSolver->SoundSpeed());
+        sound_speed += std::to_string(lbm_solver->SoundSpeed());
         ImGui::TextUnformatted(sound_speed.c_str());
 
         if ( ImGui::Checkbox("View Density", &view_density) );
@@ -79,10 +79,10 @@ void doLBMMenu()
         if ( view_density ){
 
             if ( ImGui::InputFloat2("Density Mapping", rhobounds) )
-                LBMSolver->SetDensityMapping(rhobounds[0], rhobounds[1]);
+                lbm_solver->SetDensityMapping(rhobounds[0], rhobounds[1]);
             std::string current_min_max_rho = "Current min/max density: ";
             float minmaxrho[2];
-            LBMSolver->DensityExtrema(minmaxrho);
+            lbm_solver->DensityExtrema(minmaxrho);
             current_min_max_rho += std::to_string(minmaxrho[0]);
             current_min_max_rho += "/";
             current_min_max_rho += std::to_string(minmaxrho[1]);
