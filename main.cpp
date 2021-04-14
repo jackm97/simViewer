@@ -16,30 +16,29 @@
 #include "./menus/grid_menu.h"
 #include "./menus/audio_menu.h"
 
-static void glfw_error_callback(int error, const char* description)
-{
+static void glfw_error_callback(int error, const char *description) {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-GLFWwindow* menuWindow;
-GLFWwindow* renderWindow;
+GLFWwindow *menu_window;
+GLFWwindow *render_window;
 
 // keeps everything thread safe
-bool isCalcFrame = false; // is true when thread is running to calculate frame
-bool isUpdating = false; // is true when thread is running to update solver or grid
+bool is_calc_frame = false; // is true when thread is running to calculate frame
+bool is_updating = false; // is true when thread is running to update solver or grid
 
 // Grid Variables
 // NOTE: Only square grids supported right now
-unsigned int N=64; // grid size
-float L=1.; // grid length
+unsigned int grid_size = 64; // grid size
+float grid_length = 1.; // grid length
 
 // Rendering
 float max_fps = 60; // max sim_fps, if 0, uncapped
 const float screen_refresh_rate = 240; // to limit load on GPU
-float oldSimTime = 0;
-float oldImGuiTime = 0;
-float oldRefreshTime = 0;
-float currentTime = 0;
+float old_sim_time = 0;
+float old_imgui_time = 0;
+float old_refresh_time = 0;
+float current_time = 0;
 
 // fps counter
 float sim_fps;
@@ -47,50 +46,51 @@ int iter_per_frame = 1;
 int iter = 0;
 
 // sim results
-float* img;
+float *img;
 
 // Animation Flags
-bool isAnimating = false;
-bool nextFrame = false;
-bool reRender = false;
-bool isResetting = false;
-bool failedStep = false;
+bool is_animating = false;
+bool next_frame = false;
+bool re_render = false;
+bool is_resetting = false;
+bool failed_step = false;
 
 // Renderers
-glr::sceneViewer2D renderer2D;
-glr::sceneViewer renderer3D;
+glr::sceneViewer2D renderer_2d;
+glr::sceneViewer renderer_3d;
 
-RENDER_TYPE currentRenderer = NONE;
-bool updateRenderer = false;
+RenderType current_renderer = None;
+bool update_renderer = false;
+bool render_enabled = true;
 
 // Solver Stuff
 const int numSolvers = 5;
-const char* solverNames[numSolvers] = {"", "JSSF", "JSSF Iterative", "Lattice Boltzmann", "JSSF3D"};
-SOLVER_TYPE currentSolver = EMPTY;
+const char *solverNames[numSolvers] = {"", "Jssf", "Jssf Iterative", "Lattice Boltzmann", "Jssf3D"};
+SolverType currentSolver = Empty;
 bool updateSolver = false;
 
 // fluid solvers
 //      2D
-jfs::JSSFSolver<>* jssf_solver; //(1,L,jfs::ZERO,dt);
-jfs::JSSFSolver<jfs::iterativeSolver>* jssf_solver_iter; //(1,L,jfs::ZERO,dt);
-jfs::CudaLBMSolver* lbm_solver; //(1,L,1/dt);
+jfs::JSSFSolver<> *jssf_solver; //(1,grid_length,jfs::ZERO,dt);
+jfs::JSSFSolver<jfs::iterativeSolver> *jssf_solver_iter; //(1,grid_length,jfs::ZERO,dt);
+jfs::CudaLBMSolver *lbm_solver; //(1,grid_length,1/dt);
 //      3D
-jfs::JSSFSolver3D<jfs::iterativeSolver>* jssf_solver_3d; //(1,L,jfs::ZERO,dt);
+jfs::JSSFSolver3D<jfs::iterativeSolver> *jssf_solver_3d; //(1,grid_length,jfs::ZERO,dt);
 
 // fluid visualization
 bool view_density;
 float smoke_diss = 0;
-jfs::gridSmoke2D* grid_smoke2d = nullptr;
-jfs::gridSmoke3D* grid_smoke3d = nullptr;
+jfs::gridSmoke2D *grid_smoke2d = nullptr;
+jfs::gridSmoke3D *grid_smoke3d = nullptr;
 
 
 // Sources, Forces and Points
 std::vector<jfs::Force> forces;
 std::vector<jfs::Source> sources;
 
-int main(int, char**) {
+int main(int, char **) {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    
+
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -106,7 +106,7 @@ int main(int, char**) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
     // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 330";
+    const char *glsl_version = "#version 330";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
@@ -114,19 +114,18 @@ int main(int, char**) {
 #endif
 
     // Create window with graphics context
-    menuWindow = glfwCreateWindow(1280, 720, "simViewer!", nullptr, nullptr);
-    if (menuWindow == nullptr)
+    menu_window = glfwCreateWindow(1280, 720, "simViewer!", nullptr, nullptr);
+    if (menu_window == nullptr)
         return 1;
-    glfwMakeContextCurrent(menuWindow);
+    glfwMakeContextCurrent(menu_window);
 
-    renderWindow = glfwCreateWindow(480, 480, "Output Window", nullptr, nullptr);
-    if (renderWindow == nullptr)
+    render_window = glfwCreateWindow(480, 480, "Output Window", nullptr, nullptr);
+    if (render_window == nullptr)
         return 1;
 
     // Initialize OpenGL loader
     bool err = gladLoadGL() == 0;
-    if (err)
-    {
+    if (err) {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
     }
@@ -134,13 +133,14 @@ int main(int, char**) {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO &io = ImGui::GetIO();
+    (void) io;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(menuWindow, true);
+    ImGui_ImplGlfw_InitForOpenGL(menu_window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // High-DPI
@@ -153,8 +153,7 @@ int main(int, char**) {
     glr::initialize();
 
     // Main loop
-    while (!(glfwWindowShouldClose(menuWindow) || glfwWindowShouldClose(renderWindow)) || isUpdating || isCalcFrame)
-    {
+    while (!(glfwWindowShouldClose(menu_window) || glfwWindowShouldClose(render_window)) || is_updating || is_calc_frame) {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -162,16 +161,16 @@ int main(int, char**) {
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
-        currentTime = glfwGetTime();
-            
+        current_time = glfwGetTime();
+
         // UI Stuff
-        glfwMakeContextCurrent(menuWindow);
-        
+        glfwMakeContextCurrent(menu_window);
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
+
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -183,33 +182,31 @@ int main(int, char**) {
         doAudioMenu();
 
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());  
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        if ( (currentTime - oldImGuiTime) > 1/screen_refresh_rate )
-        {          
-            oldImGuiTime = glfwGetTime();
-            glfwSwapBuffers(menuWindow);
+        if ((current_time - old_imgui_time) > 1 / screen_refresh_rate) {
+            old_imgui_time = glfwGetTime();
+            glfwSwapBuffers(menu_window);
         }
-        
+
         // Render Stuff
-        glfwMakeContextCurrent(renderWindow);
+        glfwMakeContextCurrent(render_window);
 
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-            
+
         // viewport stuff
         int viewPortSize;
         int display_w, display_h;
-        glfwGetFramebufferSize(renderWindow, &display_w, &display_h);
+        glfwGetFramebufferSize(render_window, &display_w, &display_h);
         viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
-        glViewport((display_w-viewPortSize)/2, (display_h-viewPortSize)/2, viewPortSize, viewPortSize);
-        
+        glViewport((display_w - viewPortSize) / 2, (display_h - viewPortSize) / 2, viewPortSize, viewPortSize);
+
         renderSims();
-        
-        if (currentTime - oldRefreshTime > 1/screen_refresh_rate)
-        {
-            oldRefreshTime = glfwGetTime();
-            glfwSwapBuffers(renderWindow);
+
+        if (current_time - old_refresh_time > 1 / screen_refresh_rate) {
+            old_refresh_time = glfwGetTime();
+            glfwSwapBuffers(render_window);
         }
     }
 
@@ -219,11 +216,11 @@ int main(int, char**) {
     ImGui::DestroyContext();
 
     // GLR Cleanup
-    renderer2D.cleanup();
+    renderer_2d.cleanup();
     glr::cleanup();
 
-    glfwDestroyWindow(menuWindow);
-    glfwDestroyWindow(renderWindow);
+    glfwDestroyWindow(menu_window);
+    glfwDestroyWindow(render_window);
     glfwTerminate();
 
     releaseMem();

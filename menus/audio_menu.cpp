@@ -19,8 +19,9 @@ void doAudioMenu()
     static float signal_amp = 50.f;
 
     static bool is_saving = false;
+    static bool prep_save = false;
 
-    if (currentSolver != LBM)
+    if (currentSolver != Lbm)
         return;
 
     if ( ImGui::Begin("Audio") )
@@ -38,15 +39,15 @@ void doAudioMenu()
             ImGui::InputFloat("Signal Amplification", &signal_amp);
             if (ImGui::Button("Finish Sound"))
             {
-                for (float & s : audio_file.samples[0])
+                for (float & s : buffer[0])
                     s *= signal_amp;
                 audio_file.setAudioBuffer( buffer );
                 audio_file.setBitDepth(24);
-                audio_file.setSampleRate(1 / lbm_solver->TimeStep() );
+                audio_file.setSampleRate(1 / lbm_solver->TimeStep() / iter_per_frame );
                 audio_file.save("./test.wav");
                 printf("%i\n", audio_file.getSampleRate());
                 printf("%zu\n", audio_file.samples[0].size());
-                for (float & s : audio_file.samples[0])
+                for (float & s : buffer[0])
                     s /= signal_amp;
             }
         }
@@ -58,10 +59,10 @@ void doAudioMenu()
 
     float Hz = 120;
     float w = 2 * M_PI * Hz;
-    if (do_sound && (isAnimating || nextFrame) && !isCalcFrame )
+    if (do_sound && (is_animating || next_frame) && !is_calc_frame )
     {
-        int idx = .5 * L / lbm_solver->DeltaX();
-        int range = .02 * N;
+        int idx = .5 * grid_length / lbm_solver->DeltaX();
+        int range = .02 * grid_size;
         // float ux = sound_amp * ( std::sin(w * LBMSolver->Time()) );
         int n_sample = audio_file_play.getSampleRate() * lbm_solver->Time();
         if (n_sample < audio_file_play.samples[0].size())
@@ -77,18 +78,14 @@ void doAudioMenu()
         }
     }
 
-    if ( save_sound && (isAnimating || nextFrame) )
-        is_saving = true;
-
     static int current_sample_count = 0;
     float sample_rate = 48000;
-    if ( is_saving && !isCalcFrame && iter == iter_per_frame)
+    if ( iter == (iter_per_frame - 1) && !is_calc_frame )
     {
         if ( true)
         {
-            float* rho_field = lbm_solver->RhoData();
-            int idx = .8 * L / lbm_solver->DeltaX();
-            float rho = rho_field[N*0 + idx];
+            int idx = .8 * grid_length / lbm_solver->DeltaX();
+            float rho= lbm_solver->IndexRhoData(idx, 0);
             float sample = (rho - 1.3);
             
             // while (sample_rate * LBMSolver->Time() > current_sample_count)
@@ -100,9 +97,10 @@ void doAudioMenu()
         }
 
         is_saving = false;
+        prep_save = false;
     }
 
-    if (isResetting)
+    if (is_resetting)
     {
         buffer[0].clear();
         current_sample_count = 0;

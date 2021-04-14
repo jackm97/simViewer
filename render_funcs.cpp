@@ -8,36 +8,36 @@ void doRendererUpdate()
     switch (currentSolver)
     {
     
-    case EMPTY:
-        currentRenderer = NONE;
+    case Empty:
+        current_renderer = None;
         break;
 
     // 2D
-    case JSSF:
-    case JSSFIter:
-    case LBM:
-        currentRenderer = DIM2;
+    case Jssf:
+    case JssfIter:
+    case Lbm:
+        current_renderer = Dim2;
         break;
 
     // 3D
-    case JSSF3D:
-        currentRenderer = DIM3;
+    case Jssf3D:
+        current_renderer = Dim3;
         break;
     }
     
     
-    switch (currentRenderer)
+    switch (current_renderer)
     {
     
-    case EMPTY:
+    case Empty:
         break;
 
     // 2D
-    case DIM2:
-        reRender = true;
-        renderer2D.init();
-        renderer2D.getTexture("background")->genNewTexture(N,N);
-        renderer2D.setBounds(L, L);
+    case Dim2:
+        re_render = true;
+        renderer_2d.init();
+        renderer_2d.getTexture("background")->genNewTexture(grid_size, grid_size);
+        renderer_2d.setBounds(grid_length, grid_length);
         break;
     }
 }
@@ -45,95 +45,108 @@ void doRendererUpdate()
 bool JSSFRender(void* imgPtr)
 {
     bool newImage = false;
-    if (isResetting)
+
+    if (iter == iter_per_frame)
+        iter = 0;
+
+    if (is_resetting)
     {
-        iter = iter_per_frame;
+        iter = (iter_per_frame - 1);
         jssf_solver->resetFluid();
         grid_smoke2d->resetSmoke();
-        isResetting = false;
+        is_resetting = false;
         newImage = true;
     }
-    else if (isAnimating || nextFrame)
+    else if (is_animating || next_frame)
     {
-        if ( !(failedStep = jssf_solver->calcNextStep(forces)) );
-        if (!failedStep && iter == iter_per_frame)
+        failed_step = jssf_solver->calcNextStep(forces);
+        if (!failed_step && iter == (iter_per_frame - 1))
         {
-            nextFrame = false;
+            next_frame = false;
             newImage = true;
-            grid_smoke2d->updateSmoke(sources, jssf_solver->velocityData());
+            if (render_enabled)
+                grid_smoke2d->updateSmoke(sources, jssf_solver->velocityData());
         }
     }
-    else if (reRender)
+    else if (re_render)
     {
-        iter = iter_per_frame;
-        reRender = false;
+        iter = (iter_per_frame - 1);
+        re_render = false;
         newImage = true;
     }
-    if (newImage) { *(float**)imgPtr = grid_smoke2d->smokeData();}
+    if (newImage && render_enabled) { *(float**)imgPtr = grid_smoke2d->smokeData();}
     return newImage;
 }
 
 bool JSSFIterRender(void* imgPtr)
 {
-    Eigen::VectorXf &img = *((Eigen::VectorXf*) imgPtr);
     bool newImage = false;
-    if (isResetting)
+
+    if (iter == iter_per_frame)
+        iter = 0;
+
+    if (is_resetting)
     {
-        iter = iter_per_frame;
+        iter = (iter_per_frame - 1);
         jssf_solver_iter->resetFluid();
         grid_smoke2d->resetSmoke();
-        isResetting = false;
+        is_resetting = false;
         newImage = true;
     }
-    else if (isAnimating || nextFrame)
+    else if (is_animating || next_frame)
     {
-        if ( !(failedStep = jssf_solver_iter->calcNextStep(forces)) );
-        if (!failedStep && iter == iter_per_frame)
+        failed_step = jssf_solver_iter->calcNextStep(forces);
+        if (!failed_step && iter == (iter_per_frame - 1))
         {
-            nextFrame = false;
+            next_frame = false;
             newImage = true;
-            grid_smoke2d->updateSmoke(sources, jssf_solver_iter->velocityData());
+            if (render_enabled)
+                grid_smoke2d->updateSmoke(sources, jssf_solver_iter->velocityData());
         }
     }
-    else if (reRender)
+    else if (re_render)
     {
-        iter = iter_per_frame;
-        reRender = false;
+        iter = (iter_per_frame - 1);
+        re_render = false;
         newImage = true;
     }
-    if (newImage) { *(float**)imgPtr = grid_smoke2d->smokeData();}
+    if (newImage && render_enabled) { *(float**)imgPtr = grid_smoke2d->smokeData();}
     return newImage;
 }
 
 bool LBMRender(void* imgPtr)
 {
-    Eigen::VectorXf &img = *((Eigen::VectorXf*) imgPtr);
     bool newImage = false;
-    if (isResetting)
+
+    if (iter == iter_per_frame)
+        iter = 0;
+
+    if (is_resetting)
     {
-        iter = iter_per_frame;
+        iter = (iter_per_frame - 1);
         lbm_solver->ResetFluid();
         grid_smoke2d->resetSmoke();
-        isResetting = false;
+        is_resetting = false;
         newImage = true;
     }
-    else if (isAnimating || nextFrame)
+    else if (is_animating || next_frame)
     {
-        if ( !( failedStep = lbm_solver->CalcNextStep(forces) ) );
-        if (!failedStep && iter == iter_per_frame)
+        failed_step = lbm_solver->CalcNextStep(forces);
+        if (!failed_step && iter == (iter_per_frame - 1))
         {
-            nextFrame = false;
+            next_frame = false;
             newImage = true;
-//            grid_smoke2d->updateSmoke(sources, lbm_solver->VelocityData());
+            if (render_enabled)
+                grid_smoke2d->updateSmoke(sources, lbm_solver->VelocityData());
         }
     }
-    else if (reRender)
+    else if (re_render)
     {
-        iter = iter_per_frame;
-        reRender = false;
+        iter = (iter_per_frame - 1);
+        re_render = false;
         newImage = true;
     }
-    if (newImage) 
+    if (newImage && render_enabled)
         if (!view_density) { *(float**)imgPtr = grid_smoke2d->smokeData(); }
         else { *(float**)imgPtr = lbm_solver->MappedRhoData(); }
         
@@ -142,33 +155,37 @@ bool LBMRender(void* imgPtr)
 
 bool JSSF3DRender(void* imgPtr)
 {
-    Eigen::VectorXf &img = *((Eigen::VectorXf*) imgPtr);
     bool newImage = false;
-    if (isResetting)
+
+    if (iter == iter_per_frame)
+        iter = 0;
+
+    if (is_resetting)
     {
-        iter = iter_per_frame;
+        iter = (iter_per_frame - 1);
         jssf_solver_3d->resetFluid();
         grid_smoke3d->resetSmoke();
-        isResetting = false;
+        is_resetting = false;
         newImage = true;
     }
-    else if (isAnimating || nextFrame)
+    else if (is_animating || next_frame)
     {
-        if ( !(failedStep = jssf_solver_3d->calcNextStep(forces)) );
-        if (!failedStep && iter == iter_per_frame)
+        failed_step = jssf_solver_3d->calcNextStep(forces);
+        if (!failed_step && iter == (iter_per_frame - 1))
         {
-            nextFrame = false;
+            next_frame = false;
             newImage = true;
-            grid_smoke3d->updateSmoke(sources, jssf_solver_3d->velocityData());
+            if (render_enabled)
+                grid_smoke3d->updateSmoke(sources, jssf_solver_3d->velocityData());
         }
     }
-    else if (reRender)
+    else if (re_render)
     {
-        iter = iter_per_frame;
-        reRender = false;
+        iter = (iter_per_frame - 1);
+        re_render = false;
         newImage = true;
     }
-    if (newImage) { *(float**)imgPtr = grid_smoke2d->smokeData();}
+    if (newImage && render_enabled) { *(float**)imgPtr = grid_smoke2d->smokeData();}
     return newImage;
 }
 
@@ -176,87 +193,86 @@ bool renderSims()
 {
     static std::future<bool> future; 
 
-    if (updateRenderer)
+    if (update_renderer)
         doRendererUpdate();
-    updateRenderer = false;
+    update_renderer = false;
 
     // here we start the async method
     // outside of the frame rate if statement
     // so that the overhead of starting 
     // async doesn't interfere with framerate
     // calculation
-    if (!isUpdating && !isCalcFrame)
+    if (!is_updating && !is_calc_frame)
     {
         switch (currentSolver)
         {
-        case JSSF:
-            if ((nextFrame || isAnimating || isResetting || reRender)) {
+        case Jssf:
+            if ((next_frame || is_animating || is_resetting || re_render)) {
                 future = std::async(std::launch::async, JSSFRender, (void*) &img);
-                isCalcFrame = true;
+                is_calc_frame = true;
             }
             break;
-        case JSSFIter:
-            if ((nextFrame || isAnimating || isResetting || reRender)) {
+        case JssfIter:
+            if ((next_frame || is_animating || is_resetting || re_render)) {
                 future = std::async(std::launch::async, JSSFIterRender, (void*) &img);
-                isCalcFrame = true;
+                is_calc_frame = true;
             }
             break;
-        case LBM:
-            if ((nextFrame || isAnimating || isResetting || reRender)) {
+        case Lbm:
+            if ((next_frame || is_animating || is_resetting || re_render)) {
                 future = std::async(std::launch::async, LBMRender, (void*) &img);
-                isCalcFrame = true;
+                is_calc_frame = true;
             }
             break;
-        case JSSF3D:
-            if ((nextFrame || isAnimating || isResetting || reRender)) {
+        case Jssf3D:
+            if ((next_frame || is_animating || is_resetting || re_render)) {
                 future = std::async(std::launch::async, JSSF3DRender, (void*) &img);
-                isCalcFrame = true;
+                is_calc_frame = true;
             }
             break;
         }  
     }
 
-    if ( !isUpdating && (max_fps == 0 || currentTime - oldSimTime > 1/max_fps) )
+    if (!is_updating && (max_fps == 0 || current_time - old_sim_time > 1 / max_fps) )
     {
         switch (currentSolver)
         {
-        case EMPTY:
-            if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        case Empty:
+            if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
-                isCalcFrame = false;
+                is_calc_frame = false;
                 future.get();
             }
             sim_fps = 0;
             break;
 
         // 2D
-        case JSSF:
-        case JSSFIter:
-        case LBM:
-            if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
-            { 
-                isCalcFrame = false;
-                if (future.get() && iter == iter_per_frame)
+        case Jssf:
+        case JssfIter:
+        case Lbm:
+            if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+            {
+                is_calc_frame = false;
+                if (future.get())
                 { 
-                    sim_fps = 1/(currentTime - oldSimTime);
-                    oldSimTime = glfwGetTime(); 
-                    renderer2D.getTexture("background")->loadPixels( GL_RGB, GL_FLOAT, img);
-                    iter = 0;
+                    sim_fps = 1/(current_time - old_sim_time);
+                    old_sim_time = glfwGetTime();
+                    if (render_enabled)
+                        renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
                 }
                 iter++;
             }
             break;
 
         // 3D
-        case JSSF3D:
-            if ( isCalcFrame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
+        case Jssf3D:
+            if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
             {
-                isCalcFrame = false;
-                if (future.get() && iter == iter_per_frame)
+                is_calc_frame = false;
+                if (future.get())
                 { 
-                    sim_fps = 1/(currentTime - oldSimTime);
-                    oldSimTime = glfwGetTime(); 
-                    iter = 0;
+                    sim_fps = 1/(current_time - old_sim_time);
+                    old_sim_time = glfwGetTime();
                 }
                 iter++;
             }
@@ -265,15 +281,16 @@ bool renderSims()
     }
 
     bool frameRendered = false;
-    switch (currentRenderer)
+    switch (current_renderer)
     {
-    case NONE:
+    case None:
         frameRendered = true;
         break;
     
     // 2D
-    case DIM2:
-        renderer2D.drawScene();
+    case Dim2:
+        if (render_enabled)
+            renderer_2d.drawScene();
         frameRendered = true;
         break;
     }

@@ -11,16 +11,16 @@ void releaseMem()
 {
     switch (currentSolver)
     {
-    case JSSF:
+    case Jssf:
         delete jssf_solver;
         break;
-    case JSSFIter:
+    case JssfIter:
         delete jssf_solver_iter;
         break;
-    case LBM:
+    case Lbm:
         delete lbm_solver;
         break;
-    case JSSF3D:
+    case Jssf3D:
         delete jssf_solver_3d;
         break;
     }  
@@ -29,7 +29,7 @@ void releaseMem()
 // must be called before newsolver==currentSolver
 // allocates newsolver on heap
 // frees currentsolver on heap
-void handleMem(SOLVER_TYPE newsolver)
+void handleMem(SolverType newsolver)
 {
     if (currentSolver == newsolver)
     {
@@ -40,17 +40,17 @@ void handleMem(SOLVER_TYPE newsolver)
 
     switch (newsolver)
     {
-    case JSSF:
-        jssf_solver = new jfs::JSSFSolver<>(1, L, jfs::ZERO, .1);
+    case Jssf:
+        jssf_solver = new jfs::JSSFSolver<>(1, grid_length, jfs::ZERO, .1);
         break;
-    case JSSFIter:
-        jssf_solver_iter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
+    case JssfIter:
+        jssf_solver_iter = new jfs::JSSFSolver<jfs::iterativeSolver>(1, grid_length, jfs::ZERO, .1);
         break;
-    case LBM:
-        lbm_solver = new jfs::CudaLBMSolver (1, L, jfs::ZERO, 1);
+    case Lbm:
+        lbm_solver = new jfs::CudaLBMSolver (1, grid_length, jfs::ZERO, 1);
         break;
-    case JSSF3D:
-        jssf_solver_3d = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, L, jfs::ZERO, .1);
+    case Jssf3D:
+        jssf_solver_3d = new jfs::JSSFSolver3D<jfs::iterativeSolver>(1, grid_length, jfs::ZERO, .1);
         break;
     }
     updateSolver = true;
@@ -69,7 +69,7 @@ void doSolverMenu()
     static int currentSolverTmp = currentSolver;
     static bool isChanged = false;
     
-    if (!isUpdating)
+    if (!is_updating)
     {
         if (ImGui::BeginCombo("Solver Type", solverNames[currentSolverTmp]))
         {
@@ -97,8 +97,8 @@ void doSolverMenu()
             if (ImGui::Button("Update Solver"))
             {
                 ImGui::TextUnformatted("Updating...");
-                isAnimating = false;
-                nextFrame = false;
+                is_animating = false;
+                next_frame = false;
                 updateSolver = true;
                 return;
             }
@@ -109,22 +109,22 @@ void doSolverMenu()
     static std::future<void> future;
     if (updateSolver && isChanged)
     {
-        if (!isUpdating)
+        if (!is_updating)
         {
-            auto handleMemLambda = [](){handleMem((SOLVER_TYPE) currentSolverTmp);};
+            auto handleMemLambda = [](){handleMem((SolverType) currentSolverTmp);};
             future = std::async(std::launch::async, handleMemLambda);
-            isUpdating = true;
+            is_updating = true;
         }
         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
         {
             future.get();
-            currentSolver = (SOLVER_TYPE) currentSolverTmp;
-            updateRenderer = true;
-            isUpdating = false;
+            currentSolver = (SolverType) currentSolverTmp;
+            update_renderer = true;
+            is_updating = false;
             isChanged = false;
         }
     }
-    if (isUpdating && isChanged)
+    if (is_updating && isChanged)
     {
         ImGui::TextUnformatted("Updating...");
         return;
@@ -133,20 +133,20 @@ void doSolverMenu()
     if (!isChanged)
         switch (currentSolver)
         {
-        case EMPTY:
+        case Empty:
             updateSolver = false;
             break;
 
-        case JSSF:
+        case Jssf:
             doJSSFMenu();
             break;
-        case JSSFIter:
+        case JssfIter:
             doJSSFIterMenu();
             break;
-        case LBM:
+        case Lbm:
             doLBMMenu();
             break;
-        case JSSF3D:
+        case Jssf3D:
             doJSSF3DMenu();
             break;
         }

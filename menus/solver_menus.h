@@ -15,18 +15,18 @@
 //     static std::future<void> future; // for updating solver properties
 //     static bool isChanged = false; // if solver properties are changed in the menu
 
-//     if (updateSolver && !isCalcFrame) // if solverMenu is telling us to change solver and no frame is being calculated
+//     if (updateSolver && !is_calc_frame) // if solverMenu is telling us to change solver and no frame is being calculated
 //     {
-//         if (!isUpdating) // isUpdating tells us that we are waiting for a future to complete
+//         if (!is_updating) // is_updating tells us that we are waiting for a future to complete
 //         {
 //             lambdaFunc function to update solverNames
 //             future = std::async(std::launch::async, lambdaFunc);
-//             isUpdating = true;
+//             is_updating = true;
 //         }
 //         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) ) // future is complete
 //         {
 //             future.get();
-//             isUpdating = false;
+//             is_updating = false;
 //             updateSolver = false;
 //         }
 //     }
@@ -36,7 +36,7 @@
 //         return;
 //     }
 
-//     if (!isUpdating)
+//     if (!is_updating)
 //     {
 //         do menu stuff for solver
 //         make sure to update isChanged if something is changed
@@ -59,8 +59,8 @@ void releaseMem();
 // must be called before newsolver==currentSolver
 // allocates newsolver on heap
 // frees currentsolver on heap
-enum SOLVER_TYPE : unsigned int;
-void handleMem(SOLVER_TYPE newsolver);
+enum SolverType : unsigned int;
+void handleMem(SolverType newsolver);
 
 void doSolverMenu();
 

@@ -7,7 +7,7 @@ void doSourceWindow()
     static int currentSource = 0;
     static float diss = smoke_diss;
 
-    if (currentRenderer == NONE)
+    if (current_renderer == None)
         return;
 
     if (ImGui::Begin("Sources"))
@@ -28,11 +28,11 @@ void doSourceWindow()
         }
         if (currentSource != 0)
         {
-            if (currentRenderer == DIM2)
+            if (current_renderer == Dim2)
             {
                 ImGui::InputFloat2("Position", sources[currentSource - 1].pos);
             }
-            else if (currentRenderer == DIM3)
+            else if (current_renderer == Dim3)
             {
                 ImGui::InputFloat3("Position", sources[currentSource - 1].pos);
             }
@@ -57,7 +57,7 @@ void doSourceWindow()
             if (ImGui::Button("Update Smoke"))
             {
                 smoke_diss = diss;
-                updateRenderer = true;
+                update_renderer = true;
                 updateSolver = true;
             }
         }

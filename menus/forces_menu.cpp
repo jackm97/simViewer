@@ -8,7 +8,7 @@ void doForceWindow()
     static std::vector<std::string> forceList = {""};
     static int currentForce = 0;
 
-    if (currentRenderer == NONE)
+    if (current_renderer == None)
         return;
 
     if (ImGui::Begin("Forces"))
@@ -29,12 +29,12 @@ void doForceWindow()
         }
         if (currentForce != 0)
         {
-            if (currentRenderer == DIM2)
+            if (current_renderer == Dim2)
             {
                 ImGui::InputFloat2("Position", forces[currentForce - 1].pos);
                 ImGui::InputFloat2("Force", forces[currentForce - 1].force);
             }
-            else if (currentRenderer == DIM3)
+            else if (current_renderer == Dim3)
             {
                 ImGui::InputFloat3("Position", forces[currentForce - 1].pos);
                 ImGui::InputFloat3("Force", forces[currentForce - 1].force);

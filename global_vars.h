@@ -9,25 +9,25 @@
 #include <GLFW/glfw3.h>
 
 
-extern GLFWwindow* menuWindow;
-extern GLFWwindow* renderWindow;
+extern GLFWwindow* menu_window;
+extern GLFWwindow* render_window;
 
 // keeps everything thread safe
-extern bool isCalcFrame; // is true when thread is running to calculate frame
-extern bool isUpdating; // is true when thread is running to update solver or grid
+extern bool is_calc_frame; // is true when thread is running to calculate frame
+extern bool is_updating; // is true when thread is running to update solver or grid
 
 // Grid Variables
 // NOTE: Only square grids supported right now
-extern unsigned int N; // grid size
-extern float L; // grid length
+extern unsigned int grid_size; // grid size
+extern float grid_length; // grid length
 
 // Rendering
 extern float max_fps; // max sim_fps, if 0, uncapped
 extern const float screen_refresh_rate; // to limit load on GPU
-extern float oldSimTime;
-extern float oldImGuiTime;
-extern float oldRefreshTime;
-extern float currentTime;
+extern float old_sim_time;
+extern float old_imgui_time;
+extern float old_refresh_time;
+extern float current_time;
 
 // fps counter
 extern float sim_fps;
@@ -38,26 +38,27 @@ extern int iter;
 extern float* img;
 
 // Animation Flags
-extern bool isAnimating;
-extern bool nextFrame;
-extern bool reRender;
-extern bool isResetting;
-extern bool failedStep;
+extern bool is_animating;
+extern bool next_frame;
+extern bool re_render;
+extern bool is_resetting;
+extern bool failed_step;
 
 // Renderers
 #include <glr/sceneviewer2d.h>
-extern glr::sceneViewer2D renderer2D;
+extern glr::sceneViewer2D renderer_2d;
 #include <glr/sceneviewer.h>
-extern glr::sceneViewer renderer3D;
+extern glr::sceneViewer renderer_3d;
 
-enum RENDER_TYPE : unsigned int{
-    NONE,
-    DIM2,
-    DIM3
+enum RenderType : unsigned int{
+    None,
+    Dim2,
+    Dim3
 };
 
-extern RENDER_TYPE currentRenderer;
-extern bool updateRenderer;
+extern RenderType current_renderer;
+extern bool update_renderer;
+extern bool render_enabled;
 
 // Solver Stuff
 #include <jfs/JSSFSolver.h>
@@ -65,26 +66,26 @@ extern bool updateRenderer;
 #include <jfs/LBMSolver.h>
 #include <jfs/cuda/lbm_solver_cuda.h>
 
-enum SOLVER_TYPE : unsigned int{
-    EMPTY = 0,
-    JSSF = 1,
-    JSSFIter = 2,
-    LBM = 3,
-    JSSF3D = 4
+enum SolverType : unsigned int{
+    Empty = 0,
+    Jssf = 1,
+    JssfIter = 2,
+    Lbm = 3,
+    Jssf3D = 4
 };
 
 extern const int numSolvers;
 extern const char* solverNames[];
-extern SOLVER_TYPE currentSolver;
+extern SolverType currentSolver;
 extern bool updateSolver;
 
 // fluid solvers
 //      2D
-extern jfs::JSSFSolver<>* jssf_solver; //(1,L,jfs::ZERO,dt);
-extern jfs::JSSFSolver<jfs::iterativeSolver>* jssf_solver_iter; //(1,L,jfs::ZERO,dt);
-extern jfs::CudaLBMSolver* lbm_solver; //(1,L,1/dt);
+extern jfs::JSSFSolver<>* jssf_solver; //(1,grid_length,jfs::ZERO,dt);
+extern jfs::JSSFSolver<jfs::iterativeSolver>* jssf_solver_iter; //(1,grid_length,jfs::ZERO,dt);
+extern jfs::CudaLBMSolver* lbm_solver; //(1,grid_length,1/dt);
 //      3D
-extern jfs::JSSFSolver3D<jfs::iterativeSolver>* jssf_solver_3d; //(1,L,jfs::ZERO,dt);
+extern jfs::JSSFSolver3D<jfs::iterativeSolver>* jssf_solver_3d; //(1,grid_length,jfs::ZERO,dt);
 
 // fluid visualization
 extern bool view_density;

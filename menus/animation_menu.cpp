@@ -25,13 +25,13 @@ void openVDBSave(int& cache_frame, std::string cache_loc, std::string cache_name
     Eigen::Vector3f color;
 
     // populate grids
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++)
-            for (int k = 0; k < N; k++)
+    for (int i = 0; i < grid_size; i++)
+        for (int j = 0; j < grid_size; j++)
+            for (int k = 0; k < grid_size; k++)
             {
-                color(0) = img[N*N*3*k + N*3*j + 3*i + 0];
-                color(1) = img[N*N*3*k + N*3*j + 3*i + 1];
-                color(2) = img[N*N*3*k + N*3*j + 3*i + 2];
+                color(0) = img[grid_size * grid_size * 3 * k + grid_size * 3 * j + 3 * i + 0];
+                color(1) = img[grid_size * grid_size * 3 * k + grid_size * 3 * j + 3 * i + 1];
+                color(2) = img[grid_size * grid_size * 3 * k + grid_size * 3 * j + 3 * i + 2];
 
                 float density = color.norm();
 
@@ -56,9 +56,9 @@ void openVDBSave(int& cache_frame, std::string cache_loc, std::string cache_name
     // Associate a scaling transform with the grid that sets the voxel size
     // to 0.5 units in world space.
     color_grid->setTransform(
-        openvdb::math::Transform::createLinearTransform(/*voxel size=*/L/N));
+        openvdb::math::Transform::createLinearTransform(/*voxel size=*/grid_length / grid_size));
     density_grid->setTransform(
-        openvdb::math::Transform::createLinearTransform(/*voxel size=*/L/N));
+        openvdb::math::Transform::createLinearTransform(/*voxel size=*/grid_length / grid_size));
 
     // Create a VDB file object.
     openvdb::io::File file(cache_loc + cache_name + "." + std::to_string(cache_frame) + ".vdb");
@@ -77,13 +77,13 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
 {    
     switch (currentSolver)
     {
-    case JSSF:
-    case JSSFIter:
-    case LBM:
+    case Jssf:
+    case JssfIter:
+    case Lbm:
         img = grid_smoke2d->smokeData();
         break;
 
-    case JSSF3D:
+    case Jssf3D:
         img = grid_smoke3d->smokeData();
         break;
     }
@@ -92,22 +92,22 @@ void cacheFrame(int& cache_frame, std::string cache_loc, std::string cache_name)
     Eigen::VectorX<unsigned char> img8bit;
     std::string full_file_path = cache_loc + cache_name + "." + std::to_string(cache_frame) + ".png";
     int flipBoolTmp = stbi__flip_vertically_on_write;
-    switch (currentRenderer)
+    switch (current_renderer)
     {
-    case DIM2:
-        img8bit.resize(3*N*N);
-        for (int i = 0; i < 3*N*N; i++)
+    case Dim2:
+        img8bit.resize(3 * grid_size * grid_size);
+        for (int i = 0; i < 3 * grid_size * grid_size; i++)
         {
             float color_byte = img[i] * 255;
             color_byte = (color_byte > 255) ? 255 : color_byte;
             img8bit[i] = (unsigned char) color_byte;
         }
         stbi_flip_vertically_on_write(1);
-        stbi_write_png(full_file_path.c_str(), N, N, 3, img8bit.data(), 3*N);
+        stbi_write_png(full_file_path.c_str(), grid_size, grid_size, 3, img8bit.data(), 3 * grid_size);
         stbi_flip_vertically_on_write(flipBoolTmp);
         break;
 
-    case DIM3:
+    case Dim3:
         openVDBSave(cache_frame, cache_loc, cache_name);
         break;
 
@@ -159,51 +159,51 @@ void doAnimationMenu(bool& checkDone, bool& acknowledgeFailedStep)
 {
 
     // terminate animation if step failed
-    if (failedStep && (isAnimating || nextFrame || acknowledgeFailedStep))
+    if (failed_step && (is_animating || next_frame || acknowledgeFailedStep))
     {
         acknowledgeFailedStep = true;
-        isAnimating = false;
-        nextFrame = false;
+        is_animating = false;
+        next_frame = false;
         checkDone = false;
         ImGui::Text("Failed frame!");
         if (ImGui::Button("OK")){
-            failedStep = false;
+            failed_step = false;
             acknowledgeFailedStep = false;
-            isResetting = true;
+            is_resetting = true;
         }
         return;
     }
     
-    if (isUpdating)
+    if (is_updating)
     {
         ImGui::Text("Updating...");
         return;
     }
-    else if (checkDone && isCalcFrame)
+    else if (checkDone && is_calc_frame)
     {
         ImGui::Text("Finishing frame...");
         return;
     }
-    else if (checkDone && !nextFrame && !isAnimating)
+    else if (checkDone && !next_frame && !is_animating)
     {
         checkDone = false;
     }
     
 
-    if (!isAnimating && ImGui::Button("Animate")) isAnimating=true;
+    if (!is_animating && ImGui::Button("Animate")) is_animating=true;
     
-    else if (isAnimating && (checkDone = ImGui::Button("Stop"))) isAnimating=false;
+    else if (is_animating && (checkDone = ImGui::Button("Stop"))) is_animating=false;
 
-    if (!checkDone && !isAnimating && (checkDone = ImGui::Button("Next Frame"))) nextFrame=true;
+    if (!checkDone && !is_animating && (checkDone = ImGui::Button("Next Frame"))) next_frame=true;
 
-    if (!checkDone && !isAnimating && ImGui::Button("Render Frame Again")) reRender = true;
+    if (!checkDone && !is_animating && ImGui::Button("Render Frame Again")) re_render = true;
     
-    if (!checkDone && (checkDone = ImGui::Button("Reset"))) isResetting = true;
+    if (!checkDone && (checkDone = ImGui::Button("Reset"))) is_resetting = true;
 
     ImGui::TextUnformatted(("FPS: " + std::to_string(std::round(sim_fps*1000)/1000.)).c_str());
 
-    if (nextFrame)
-        oldSimTime = glfwGetTime();
+    if (next_frame)
+        old_sim_time = glfwGetTime();
 }
 
 void doAnimationWindow()
@@ -218,12 +218,12 @@ void doAnimationWindow()
     static bool checkDone = false;
     static bool acknowledgeFailedStep = false;
 
-    if (currentRenderer == NONE)
+    if (current_renderer == None)
         return;
 
     if (ImGui::Begin("Animation"))
     {
-        if (!isUpdating && !isAnimating && !checkDone && !acknowledgeFailedStep)
+        if (!is_updating && !is_animating && !checkDone && !acknowledgeFailedStep)
         {
             if (ImGui::TreeNode("Cache Results"))
             {
@@ -244,7 +244,7 @@ void doAnimationWindow()
                     if (ImGui::Button("Cache Location"))
                         fileDialog.OpenDialog("ChooseDirDlgKey", "Choose a Directory", nullptr, cache_loc);
                     ImGui::TextUnformatted(cache_loc.c_str());
-                    if (ImGui::InputText("Cache Name", cache_name, 1000) || isResetting)
+                    if (ImGui::InputText("Cache Name", cache_name, 1000) || is_resetting)
                         cache_frame = 0;
                     if (ImGui::Button("Clear Cache"))
                         clear_cache = true;
@@ -257,14 +257,14 @@ void doAnimationWindow()
     }
     ImGui::End();
 
-    if (isResetting)
+    if (is_resetting)
         cache_frame = 0;
 
-    if (isCache && (isAnimating || checkDone) && !isCalcFrame)
+    if (isCache && (is_animating || checkDone) && !is_calc_frame)
         cacheFrame(cache_frame, cache_loc, cache_name);
 
     // display
-    if (!isUpdating && !isAnimating && !nextFrame && fileDialog.Display("ChooseDirDlgKey")) 
+    if (!is_updating && !is_animating && !next_frame && fileDialog.Display("ChooseDirDlgKey"))
     {
         // action if OK
         if (fileDialog.IsOk())

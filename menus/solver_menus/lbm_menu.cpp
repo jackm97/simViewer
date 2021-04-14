@@ -14,25 +14,25 @@ void doLBMMenu()
     static float rho0 = 1.3, visc = 1e-4, uref = 1;
     static float rhobounds[2]{-1, -1};
 
-    if (updateSolver && !isCalcFrame)
+    if (updateSolver && !is_calc_frame)
     {
-        if (!isUpdating)
+        if (!is_updating)
         {
-            auto initLambda = [](){lbm_solver->Initialize(N, L, fluid_btype, rho0, visc, uref);};
+            auto initLambda = [](){lbm_solver->Initialize(grid_size, grid_length, fluid_btype, rho0, visc, uref);};
             future = std::async(std::launch::async, initLambda);
-            isUpdating = true;
+            is_updating = true;
         }
         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
         {
             future.get();
             lbm_solver->SetDensityMapping(rhobounds[0], rhobounds[1]);
-            isUpdating = false;
+            is_updating = false;
             updateSolver = false;
 
             if (grid_smoke2d == NULL)
-                grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, lbm_solver->TimeStep() * iter_per_frame, smoke_diss);
+                grid_smoke2d = new jfs::gridSmoke2D(grid_size, grid_length, fluid_btype, lbm_solver->TimeStep() * iter_per_frame, smoke_diss);
             else
-                grid_smoke2d->initialize(N, L, fluid_btype, iter_per_frame * lbm_solver->TimeStep(), smoke_diss);
+                grid_smoke2d->initialize(grid_size, grid_length, fluid_btype, iter_per_frame * lbm_solver->TimeStep(), smoke_diss);
         }
     }
     if (updateSolver)
@@ -42,7 +42,7 @@ void doLBMMenu()
     }
 
 
-    if (!isUpdating)
+    if (!is_updating)
     {
         isChanged |= ImGui::InputFloat("Density", &(rho0));
         isChanged |= ImGui::InputFloat("Viscosity", &(visc), 0, 0, "%.0e");

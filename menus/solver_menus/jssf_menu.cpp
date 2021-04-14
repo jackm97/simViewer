@@ -13,23 +13,23 @@ void doJSSFMenu()
     static float dt = .1, visc = 0;
     static jfs::BoundType fluid_btype = jfs::ZERO;
 
-    if (updateSolver && !isCalcFrame)
+    if (updateSolver && !is_calc_frame)
     {
         if (grid_smoke2d == NULL)
-            grid_smoke2d = new jfs::gridSmoke2D(N, L, fluid_btype, iter_per_frame*dt, smoke_diss);
+            grid_smoke2d = new jfs::gridSmoke2D(grid_size, grid_length, fluid_btype, iter_per_frame * dt, smoke_diss);
         else
-            grid_smoke2d->initialize(N, L, fluid_btype, iter_per_frame*dt, smoke_diss);
+            grid_smoke2d->initialize(grid_size, grid_length, fluid_btype, iter_per_frame * dt, smoke_diss);
             
-        if (!isUpdating)
+        if (!is_updating)
         {
-            auto initLambda = [](){jssf_solver->initialize(N, L, fluid_btype, dt, visc);};
+            auto initLambda = [](){jssf_solver->initialize(grid_size, grid_length, fluid_btype, dt, visc);};
             future = std::async(std::launch::async, initLambda);
-            isUpdating = true;
+            is_updating = true;
         }
         if ( (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) )
         {
             future.get();
-            isUpdating = false;
+            is_updating = false;
             updateSolver = false;
         }
     }
@@ -40,7 +40,7 @@ void doJSSFMenu()
     }
 
 
-    if (!isUpdating)
+    if (!is_updating)
     {
         isChanged |= ImGui::InputFloat("Viscosity", &(visc));
         isChanged |= ImGui::InputFloat("Time Step(s)", &(dt));

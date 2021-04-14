@@ -24,7 +24,7 @@ void doPressureWindow()
     static std::vector<std::string> pList = {""};
     static int current_p_wave = 0;
 
-    if (currentSolver != LBM)
+    if (currentSolver != Lbm)
         return;
 
     if (ImGui::Begin("Pressure Waves"))
@@ -46,19 +46,19 @@ void doPressureWindow()
         if (current_p_wave != 0)
         {
 
-            if (currentRenderer == DIM2)
+            if (current_renderer == Dim2)
             {                
                 if (ImGui::InputFloat2("Position", p_waves[current_p_wave - 1].pos));
             }
-            else if (currentRenderer == DIM3)
+            else if (current_renderer == Dim3)
             {
                 if (ImGui::InputFloat3("Position", p_waves[current_p_wave - 1].pos));
             }
-            if (currentRenderer == DIM2)
+            if (current_renderer == Dim2)
             {
                 if (ImGui::InputFloat2("Center Velocity", p_waves[current_p_wave - 1].u));
             }
-            else if (currentRenderer == DIM3)
+            else if (current_renderer == Dim3)
             {
                 if (ImGui::InputFloat3("Center Velocity", p_waves[current_p_wave - 1].u));
             }
@@ -82,7 +82,7 @@ void doPressureWindow()
     }
     ImGui::End();
     
-    if (currentSolver == LBM && (isAnimating || nextFrame) && !isCalcFrame)
+    if (currentSolver == Lbm && (is_animating || next_frame) && !is_calc_frame)
         for (int p = 0; p < p_waves.size(); p++) doPressureWave(p_waves[p]);
 }
 
@@ -129,7 +129,7 @@ void doPressureWave(PressureWave p_wave)
     bool speed_check;
     bool idx_check;
 
-    idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+    idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
     speed_check = (ux * dir(0) + uy * dir(1)) > 0;
     if ( (idx_check && speed_check) || p_wave.skadoosh )
         lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -149,7 +149,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -165,7 +165,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -181,7 +181,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -221,7 +221,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -237,7 +237,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -253,7 +253,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -269,7 +269,7 @@ void doPressureWave(PressureWave p_wave)
         ux = dir(0) * u_imp + p_wave.u[0];
         uy = dir(1) * u_imp + p_wave.u[1];
 
-        idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+        idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
             lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -289,7 +289,7 @@ void doPressureWave(PressureWave p_wave)
             ux = dir(0) * u_imp + p_wave.u[0];
             uy = dir(1) * u_imp + p_wave.u[1];
 
-            idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+            idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
                 lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -305,7 +305,7 @@ void doPressureWave(PressureWave p_wave)
             ux = dir(0) * u_imp + p_wave.u[0];
             uy = dir(1) * u_imp + p_wave.u[1];
 
-            idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+            idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
                 lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -321,7 +321,7 @@ void doPressureWave(PressureWave p_wave)
             ux = dir(0) * u_imp + p_wave.u[0];
             uy = dir(1) * u_imp + p_wave.u[1];
 
-            idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+            idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
                 lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
@@ -337,7 +337,7 @@ void doPressureWave(PressureWave p_wave)
             ux = dir(0) * u_imp + p_wave.u[0];
             uy = dir(1) * u_imp + p_wave.u[1];
 
-            idx_check = !(indices(0) > N-1 || indices(0) < 0 || indices(1) > N-1 || indices(1) < 0);
+            idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
                 lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
