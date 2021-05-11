@@ -3,6 +3,6 @@
 
 void doAnimationWindow();
 
-void updateCache();
+void cacheFrame();
 
 #endif

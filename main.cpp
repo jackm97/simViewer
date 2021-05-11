@@ -34,7 +34,7 @@ float grid_length = 1.; // grid length
 
 // Rendering
 float max_fps = 60; // max sim_fps, if 0, uncapped
-const float screen_refresh_rate = 240; // to limit load on GPU
+const float screen_refresh_rate = 144; // to limit load on GPU
 float old_sim_time = 0;
 float old_imgui_time = 0;
 float old_refresh_time = 0;
@@ -60,7 +60,7 @@ glr::sceneViewer2D renderer_2d;
 glr::sceneViewer renderer_3d;
 
 RenderType current_renderer = None;
-bool update_renderer = false;
+bool update_renderer = true;
 bool render_enabled = true;
 
 // Solver Stuff
@@ -150,6 +150,7 @@ int main(int, char **) {
 
 
     // Initialize GLR library
+    glfwMakeContextCurrent(render_window);
     glr::initialize();
 
     // Main loop
@@ -164,49 +165,77 @@ int main(int, char **) {
         current_time = glfwGetTime();
 
         // UI Stuff
-        glfwMakeContextCurrent(menu_window);
-
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        doAnimationWindow();
-        doMainWindow();
-        doForceWindow();
-        doSourceWindow();
-        doPressureWindow();
-        doAudioMenu();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         if ((current_time - old_imgui_time) > 1 / screen_refresh_rate) {
+            glfwMakeContextCurrent(menu_window);
+
+
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            doAnimationWindow();
+            doMainWindow();
+            doForceWindow();
+            doSourceWindow();
+            doPressureWindow();
+            doAudioMenu();
+
+            ImGui::Render();
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             old_imgui_time = glfwGetTime();
             glfwSwapBuffers(menu_window);
         }
 
+        // Things that need to be called on each loop for menu stuff
+        cacheFrame(); // only caches frame if user activates caching
+        updateAudio();
+
         // Render Stuff
         glfwMakeContextCurrent(render_window);
+        static bool draw_and_swap = false;
+        if (current_time - old_refresh_time > 1 / screen_refresh_rate) {
 
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        // viewport stuff
-        int viewPortSize;
-        int display_w, display_h;
-        glfwGetFramebufferSize(render_window, &display_w, &display_h);
-        viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
-        glViewport((display_w - viewPortSize) / 2, (display_h - viewPortSize) / 2, viewPortSize, viewPortSize);
+            // viewport stuff
+            int viewPortSize;
+            int display_w, display_h;
+            glfwGetFramebufferSize(render_window, &display_w, &display_h);
+            viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
+            glViewport((display_w - viewPortSize) / 2, (display_h - viewPortSize) / 2, viewPortSize, viewPortSize);
+
+            draw_and_swap = true;
+        }
 
         renderSims();
 
-        if (current_time - old_refresh_time > 1 / screen_refresh_rate) {
+        if (draw_and_swap) {
+
+            switch (current_renderer)
+            {
+                case None:
+                    break;
+
+                    // 2D
+                case Dim2:
+                    if (render_enabled)
+                        renderer_2d.drawScene();
+                    break;
+
+                case Dim3:
+                    break;
+            }
+
             old_refresh_time = glfwGetTime();
             glfwSwapBuffers(render_window);
+
+            draw_and_swap = false;
         }
     }
 

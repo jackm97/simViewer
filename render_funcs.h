@@ -11,6 +11,6 @@ bool LBMRender(void* imgPtr);
 
 bool JSSF3DRender(void* imgPtr);
 
-bool renderSims();
+void renderSims();
 
 #endif

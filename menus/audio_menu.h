@@ -3,4 +3,6 @@
 
 void doAudioMenu();
 
+void updateAudio();
+
 #endif
