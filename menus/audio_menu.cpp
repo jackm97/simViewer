@@ -1,8 +1,11 @@
 #include "audio_menu.h"
+
+#define _USE_MATH_DEFINES 
+#include <cmath>
+
 #include "../global_vars.h"
 #include <AudioFile/AudioFile.h>
 
-#include <cmath>
 #include <string>
 
 AudioFile<float> audio_file;

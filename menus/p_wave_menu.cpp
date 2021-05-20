@@ -1,4 +1,8 @@
 #include "p_wave_menu.h"
+
+#define _USE_MATH_DEFINES 
+#include <cmath>
+
 #include "../global_vars.h"
 
 struct PressureWave
