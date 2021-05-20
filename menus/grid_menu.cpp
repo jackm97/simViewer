@@ -34,6 +34,7 @@ void doGridMenu()
         isChanged |= ImGui::InputInt("Grid Size (>0)", (int*) &grid_size);
         isChanged |= ImGui::InputFloat("Grid Length (>0)", &grid_length);
         isChanged |= ImGui::InputInt("Maximum Simulation FPS(0 is uncapped)", &fps_tmp);
+        isChanged |= ImGui::InputInt("Iterations Per Frame", &(iter_per_frame));
         ImGui::Checkbox("Enable Rendering", &render_enabled);
 
         // if something is changed

@@ -132,7 +132,7 @@ void doPressureWave(PressureWave p_wave)
     idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
     speed_check = (ux * dir(0) + uy * dir(1)) > 0;
     if ( (idx_check && speed_check) || p_wave.skadoosh )
-        lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+        lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
       
     // When radius is zero only a single 
     // point will be printed 
@@ -152,7 +152,7 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
         // 2
         indices(0) = i + y;
@@ -168,7 +168,8 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
         // 3
         indices(0) = i - y;
@@ -184,7 +185,8 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
     } 
       
     // Initialising the value of P 
@@ -224,7 +226,8 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
         // 2 
         indices(0) = i - x;
@@ -240,7 +243,8 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
         // 3 
         indices(0) = i + x;
@@ -256,7 +260,8 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
         // 4 
         indices(0) = i - x;
@@ -272,7 +277,8 @@ void doPressureWave(PressureWave p_wave)
         idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
         speed_check = (ux * dir(0) + uy * dir(1)) > 0;
         if ( (idx_check && speed_check) || p_wave.skadoosh )
-            lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
           
         // If the generated point is on the line x = y then  
         // the perimeter points have already been printed 
@@ -292,7 +298,8 @@ void doPressureWave(PressureWave p_wave)
             idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
-                lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
             // 2 
             indices(0) = i - y;
@@ -308,7 +315,8 @@ void doPressureWave(PressureWave p_wave)
             idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
-                lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
             // 3 
             indices(0) = i + y;
@@ -324,7 +332,8 @@ void doPressureWave(PressureWave p_wave)
             idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
-                lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
 
             // 4 
             indices(0) = i - y;
@@ -340,7 +349,8 @@ void doPressureWave(PressureWave p_wave)
             idx_check = !(indices(0) > grid_size - 1 || indices(0) < 0 || indices(1) > grid_size - 1 || indices(1) < 0);
             speed_check = (ux * dir(0) + uy * dir(1)) > 0;
             if ( (idx_check && speed_check) || p_wave.skadoosh )
-                lbm_solver->ForceVelocity(indices(0), indices(1), ux, uy);
+
+            lbm_solver->ForceVelocity(&(indices(0)), &(indices(1)), &ux, &uy, 1);
         } 
     } 
 }

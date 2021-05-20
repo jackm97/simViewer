@@ -64,7 +64,6 @@ void doLBMMenu()
             }
             ImGui::EndCombo();
         }
-        isChanged |= ImGui::InputInt("Iterations Per Frame", &(iter_per_frame));
         
         std::string sim_time_step = "Time step (s): ";
         sim_time_step += std::to_string(lbm_solver->TimeStep());

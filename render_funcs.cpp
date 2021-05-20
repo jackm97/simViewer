@@ -70,7 +70,7 @@ bool JSSFRender(void *imgPtr) {
         re_render = false;
         new_image = true;
     }
-    if (new_image && render_enabled) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
+    if (new_image) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
     return new_image;
 }
 
@@ -102,7 +102,7 @@ bool JSSFIterRender(void *imgPtr) {
         re_render = false;
         new_image = true;
     }
-    if (new_image && render_enabled) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
+    if (new_image) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
     return new_image;
 }
 
@@ -121,7 +121,6 @@ bool LBMRender(void *imgPtr) {
     } else if (is_animating || next_frame) {
         failed_step = lbm_solver->CalcNextStep(forces);
         if (!failed_step && iter == (iter_per_frame - 1)) {
-            lbm_solver->SyncHostWithDevice();
             next_frame = false;
             new_image = true;
             if (render_enabled)
@@ -131,12 +130,11 @@ bool LBMRender(void *imgPtr) {
             next_frame = false;
         }
     } else if (re_render) {
-        lbm_solver->SyncHostWithDevice();
         iter = (iter_per_frame - 1);
         re_render = false;
         new_image = true;
     }
-    if (new_image && render_enabled) {
+    if (new_image) {
         if (!view_density) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
         else { *(float **) imgPtr = lbm_solver->MappedRhoData(); }
     }
@@ -172,12 +170,14 @@ bool JSSF3DRender(void *imgPtr) {
         re_render = false;
         new_image = true;
     }
-    if (new_image && render_enabled) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
+    if (new_image) { *(float **) imgPtr = grid_smoke3d->smokeData(); }
     return new_image;
 }
 
 void renderSims() {
     static std::future<bool> future;
+
+    static bool waiting_to_render = false;
 
     if (update_renderer)
         doRendererUpdate();
@@ -217,13 +217,9 @@ void renderSims() {
         }
     }
 
-    if (!is_updating && (max_fps == 0 || current_time - old_sim_time > 1 / max_fps)) {
+    if (!is_updating) {
         switch (currentSolver) {
             case Empty:
-                if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
-                    is_calc_frame = false;
-                    future.get();
-                }
                 sim_fps = 0;
                 break;
 
@@ -231,12 +227,20 @@ void renderSims() {
             case Jssf:
             case JssfIter:
             case Lbm:
-                if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
-                    is_calc_frame = false;
-                    if (future.get()) {
+                if (waiting_to_render) {
+                    if (max_fps == 0 || current_time - old_sim_time > 1 / max_fps) {
                         sim_fps = 1 / (current_time - old_sim_time);
                         old_sim_time = glfwGetTime();
                         renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
+                        waiting_to_render = false;
+                        is_calc_frame = false;
+                    }
+                }
+                else if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                    if (future.get()) {
+                        waiting_to_render = true;
+                    } else {
+                        is_calc_frame = false;
                     }
                     iter++;
                 }

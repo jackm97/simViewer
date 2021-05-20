@@ -32,7 +32,7 @@ void doAudioMenu()
     {
         if (ImGui::Checkbox("Generate Sound?", &do_sound)) {
             audio_file_play.load(
-                    "/home/jack/Downloads/[ONTIVA.COM]-Rick Astley - Never Gonna Give You Up (Video)-HQ.wav");
+                    "/home/jack/Music/[ONTIVA.COM]-Rick Astley - Never Gonna Give You Up (Video)-HQ.wav");
             float min_signal = audio_file_play.samples[0][0];
             float max_signal = audio_file_play.samples[0][0];
             float mean_signal = 0;
@@ -119,35 +119,41 @@ void updateAudio(){
 
     float Hz = 1.f/10.f;
     float w = 2 * (float) M_PI * Hz;
-    if (do_sound && (is_animating || next_frame) && !is_calc_frame)
-    {
+    if (do_sound && (is_animating || next_frame) && !is_calc_frame) {
         float y = .5 * grid_length + .4 * grid_length * std::sin(w * lbm_solver->Time());
-        float x = .5 * grid_length - .4 * grid_length * std::abs( std::cos(w * lbm_solver->Time()) );
+        float x = .5 * grid_length - .4 * grid_length * std::abs(std::cos(w * lbm_solver->Time()));
         int idx_y = y / lbm_solver->DeltaX();
         int idx_x = x / lbm_solver->DeltaX();
         int range = .005 * grid_size;
         // float ux = sound_amp * ( std::sin(w * LBMSolver->Time()) );
         float n_sample = audio_file_play.getSampleRate() * lbm_solver->Time();
-        if (n_sample < audio_file_play.samples[0].size())
-        {
+        if (n_sample < audio_file_play.samples[0].size()) {
 //            if (forces.size() == 0)
 //                forces.push_back(jfs::Force());
 //            forces[0].pos[0] = .5 * grid_length;
 //            forces[0].pos[1] = .5 * grid_length;
 
             float sample = audio_file_play.samples[0][n_sample];
-            float ux = sound_amp * sample * std::abs( std::cos(w * lbm_solver->Time()) );
-            float uy = - sound_amp * sample * std::sin(w * lbm_solver->Time());
+            float ux = sound_amp * sample * std::abs(std::cos(w * lbm_solver->Time()));
+            float uy = -sound_amp * sample * std::sin(w * lbm_solver->Time());
 //            forces[0].force[0] = ux;
 //            lbm_solver->ForceVelocity(idx_x, idx_y, ux, uy);
-            lbm_solver->AddMassSource(idx_x, idx_y, sound_amp * sample);
-            float head_depth = .178;
-            int min_head = (int) ( (.5 * grid_length - head_depth/2) / grid_length * (float) grid_size );
-            int max_head = (int) ( (.5 * grid_length + head_depth/2) / grid_length * (float) grid_size );
-            for (int i = min_head; i < max_head; i++){
-                int j = (int) ( .5 * grid_length / grid_length * (float) grid_size );
-                lbm_solver->ForceVelocity(i, j, 0, 0);
-            }
+            float rho_current = lbm_solver->IndexRhoData(idx_x, idx_y);
+            float rho_amp = sound_amp * sample + lbm_solver->Rho0();
+            lbm_solver->AddMassSource(idx_x, idx_y, rho_amp - rho_current);
+//            float head_depth = .178;
+//            int min_head = (int) ((.5 * grid_length - head_depth / 2) / grid_length * (float) grid_size);
+//            int max_head = (int) ((.5 * grid_length + head_depth / 2) / grid_length * (float) grid_size);
+//            std::vector<int> i_vec, j_vec;
+//            std::vector<float> u_zero;
+//            for (int i = min_head; i <= max_head; i++) {
+//                for (int j = (int) (min_head + .1 * (max_head - min_head)); j <= .9 * max_head; j++) {
+//                    i_vec.push_back(i);
+//                    j_vec.push_back(j);
+//                    u_zero.push_back(0);
+//                }
+//            }
+//            lbm_solver->ForceVelocity(i_vec.data(), j_vec.data(), u_zero.data(), u_zero.data(), u_zero.size());
         }
     }
 

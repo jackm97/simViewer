@@ -198,6 +198,7 @@ int main(int, char **) {
         // Render Stuff
         glfwMakeContextCurrent(render_window);
         static bool draw_and_swap = false;
+        current_time = glfwGetTime();
         if (current_time - old_refresh_time > 1 / screen_refresh_rate) {
 
             glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
