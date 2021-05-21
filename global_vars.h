@@ -15,6 +15,7 @@ extern GLFWwindow* render_window;
 // keeps everything thread safe
 extern bool is_calc_frame; // is true when thread is running to calculate frame
 extern bool is_updating; // is true when thread is running to update solver or grid
+extern bool waiting_to_render;
 
 // Grid Variables
 // NOTE: Only square grids supported right now

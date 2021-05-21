@@ -177,8 +177,6 @@ bool JSSF3DRender(void *imgPtr) {
 void renderSims() {
     static std::future<bool> future;
 
-    static bool waiting_to_render = false;
-
     if (update_renderer)
         doRendererUpdate();
     update_renderer = false;
@@ -231,16 +229,15 @@ void renderSims() {
                     if (max_fps == 0 || current_time - old_sim_time > 1 / max_fps) {
                         sim_fps = 1 / (current_time - old_sim_time);
                         old_sim_time = glfwGetTime();
-                        renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
                         waiting_to_render = false;
-                        is_calc_frame = false;
                     }
                 }
-                else if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                    is_calc_frame = false;
                     if (future.get()) {
                         waiting_to_render = true;
-                    } else {
-                        is_calc_frame = false;
+                        if (render_enabled)
+                            renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
                     }
                     iter++;
                 }
