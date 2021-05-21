@@ -26,7 +26,7 @@ GLFWwindow *render_window;
 // keeps everything thread safe
 bool is_calc_frame = false; // is true when thread is running to calculate frame
 bool is_updating = false; // is true when thread is running to update solver or grid
-bool waiting_to_render = false;
+std::atomic<bool> waiting_to_render = false;
 
 // Grid Variables
 // NOTE: Only square grids supported right now

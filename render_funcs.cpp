@@ -71,6 +71,10 @@ bool JSSFRender(void *imgPtr) {
         new_image = true;
     }
     if (new_image) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
+
+    while (iter == iter_per_frame - 1 && waiting_to_render)
+        continue;
+
     return new_image;
 }
 
@@ -103,6 +107,10 @@ bool JSSFIterRender(void *imgPtr) {
         new_image = true;
     }
     if (new_image) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
+
+    while (iter == iter_per_frame - 1 && waiting_to_render)
+        continue;
+
     return new_image;
 }
 
@@ -139,6 +147,9 @@ bool LBMRender(void *imgPtr) {
         else { *(float **) imgPtr = lbm_solver->MappedRhoData(); }
     }
 
+    while (iter == iter_per_frame - 1 && waiting_to_render)
+        continue;
+
     return new_image;
 }
 
@@ -171,6 +182,10 @@ bool JSSF3DRender(void *imgPtr) {
         new_image = true;
     }
     if (new_image) { *(float **) imgPtr = grid_smoke3d->smokeData(); }
+
+    while (iter == iter_per_frame - 1 && waiting_to_render)
+        continue;
+
     return new_image;
 }
 
