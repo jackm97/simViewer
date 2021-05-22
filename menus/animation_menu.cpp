@@ -5,7 +5,6 @@
 #include <vector>
 #include <cmath>
 
-#include <ImGuiFileDialog/ImGuiFileDialog.h>
 #include <Eigen/Eigen>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -16,7 +15,6 @@
 #include <filesystem>
 
 bool isCache = false;
-ImGuiFileDialog fileDialog;
 std::string cache_loc = "../.cache/";
 std::string cache_name = "result";
 int cache_frame = 0;

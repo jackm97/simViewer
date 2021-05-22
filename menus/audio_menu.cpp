@@ -8,6 +8,14 @@
 
 #include <string>
 
+#include <filesystem>
+
+std::string audio_filename = "";
+bool choosing_audio_file = false;
+std::string audio_save_location = "";
+bool choosing_save_location = false;
+bool is_audio_loaded = false;
+
 AudioFile<float> audio_file;
 AudioFile<float>::AudioBuffer buffer(2);
 std::vector<float> rho_list_l;
@@ -31,38 +39,71 @@ void doAudioMenu()
     if (currentSolver != Lbm)
         return;
 
-    if ( ImGui::Begin("Audio") )
+    if (!audioFileDialog.IsOpened())
     {
-        if (ImGui::Checkbox("Generate Sound?", &do_sound)) {
-            audio_file_play.load(
-                    "/home/jack/Music/[ONTIVA.COM]-Rick Astley - Never Gonna Give You Up (Video)-HQ.wav");
-            float min_signal = audio_file_play.samples[0][0];
-            float max_signal = audio_file_play.samples[0][0];
-            float mean_signal = 0;
-            for ( float & s : audio_file_play.samples[0] )
-            {
-                if (min_signal > s)
-                    min_signal = s;
-                if (max_signal < s)
-                    max_signal = s;
-                mean_signal += s;
-            }
-            mean_signal /= audio_file_play.samples[0].size();
+        choosing_audio_file = false;
+        choosing_save_location = false;
+    }
 
-            for ( float & s : audio_file_play.samples[0] )
-            {
-                s = (s - mean_signal)/(max_signal - min_signal);
-                s *= signal_amp;
-            }
+    // display
+    if (!is_updating && !is_animating && !next_frame && audioFileDialog.Display("ChooseFileDlgKey")) {
+        // action if OK
+        if (audioFileDialog.IsOk()) {
+            if (choosing_audio_file)
+                audio_filename = audioFileDialog.GetFilePathName();
+            if (choosing_save_location)
+                audio_save_location = audioFileDialog.GetFilePathName();
         }
-        if ( do_sound )
+
+        // close
+        audioFileDialog.Close();
+    }
+
+
+    if ( ImGui::Begin("Audio") && !choosing_audio_file && !choosing_save_location)
+    {
+        ImGui::Checkbox("Generate Sound?", &do_sound);
+        if (do_sound) {
+            if (ImGui::Button("Audio File")) {
+                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", ".");
+                choosing_audio_file = true;
+            }
+            ImGui::TextUnformatted(audio_filename.c_str());
+            if (ImGui::Button("Load Audio")) {
+                is_audio_loaded = true;
+                audio_file_play.load(audio_filename);
+                float min_signal = audio_file_play.samples[0][0];
+                float max_signal = audio_file_play.samples[0][0];
+                float mean_signal = 0;
+                for (float& s : audio_file_play.samples[0])
+                {
+                    if (min_signal > s)
+                        min_signal = s;
+                    if (max_signal < s)
+                        max_signal = s;
+                    mean_signal += s;
+                }
+                mean_signal /= audio_file_play.samples[0].size();
+
+                for (float& s : audio_file_play.samples[0])
+                {
+                    s = (s - mean_signal) / (max_signal - min_signal);
+                    s *= signal_amp;
+                }
+            }
             ImGui::InputFloat("Sound Amplitude", &sound_amp);
+        }
 
 
         ImGui::Checkbox("Save Sound?", &save_sound);
 
-        if (save_sound)
+        if (save_sound && is_audio_loaded)
         {
+            if (ImGui::Button("Save Location")) {
+                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", ".");
+                choosing_save_location = true;
+            }
+            ImGui::TextUnformatted(audio_save_location.c_str());
             ImGui::InputFloat("Signal Amplification", &signal_amp);
             if (ImGui::Button("Finish Sound"))
             {
@@ -91,7 +132,7 @@ void doAudioMenu()
                 audio_file.setAudioBuffer( buffer );
                 audio_file.setBitDepth(24);
                 audio_file.setSampleRate(1 / lbm_solver->TimeStep() / (float) iter_per_frame );
-                audio_file.save("./test.wav");
+                audio_file.save(audio_save_location);
                 printf("%i\n", audio_file.getSampleRate());
                 printf("%zu,%zu\n", audio_file.samples[0].size(), audio_file.samples[1].size());
                 for (float & s : buffer[0]) {
@@ -122,7 +163,7 @@ void updateAudio(){
 
     float Hz = 1.f/10.f;
     float w = 2 * (float) M_PI * Hz;
-    if (do_sound && (is_animating || next_frame) && !is_calc_frame) {
+    if (is_audio_loaded && do_sound && (is_animating || next_frame) && !is_calc_frame) {
         float y = .5 * grid_length + .4 * grid_length * std::sin(w * lbm_solver->Time());
         float x = .5 * grid_length - .4 * grid_length * std::abs(std::cos(w * lbm_solver->Time()));
         int idx_y = y / lbm_solver->DeltaX();
@@ -160,7 +201,7 @@ void updateAudio(){
         }
     }
 
-    if (iter == (iter_per_frame - 1) && save_sound)
+    if (is_audio_loaded && iter == (iter_per_frame - 1) && save_sound)
         is_saving = true;
 
     float sample_rate = 48000;

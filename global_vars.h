@@ -10,6 +10,10 @@
 
 #include <future>
 
+#include <ImGuiFileDialog/ImGuiFileDialog.h>
+extern ImGuiFileDialog fileDialog;
+extern ImGuiFileDialog audioFileDialog;
+
 
 extern GLFWwindow* menu_window;
 extern GLFWwindow* render_window;

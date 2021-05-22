@@ -47,7 +47,7 @@ void doSourceWindow()
         }
         if (ImGui::Button("Delete Source") && currentSource!=0)
         {
-            sourceList.erase(sourceList.end());
+            sourceList.erase(sourceList.end() - 1);
             sources.erase(sources.begin() + currentSource - 1);
             currentSource-=1;
         }

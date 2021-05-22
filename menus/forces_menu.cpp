@@ -48,7 +48,7 @@ void doForceWindow()
         }
         if (ImGui::Button("Delete Force") && currentForce!=0)
         {
-            forceList.erase(forceList.end());
+            forceList.erase(forceList.end() - 1);
             forces.erase(forces.begin() + currentForce - 1);
             currentForce-=1;
         }
