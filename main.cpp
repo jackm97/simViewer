@@ -168,8 +168,11 @@ int main(int, char **) {
 
         current_time = glfwGetTime();
 
-        // UI Stuff
-        if ((current_time - old_imgui_time) > 1 / screen_refresh_rate) {
+        renderSims();
+
+        if ((current_time - old_refresh_time) > 1 / screen_refresh_rate) {
+
+            // UI Stuff
             glfwMakeContextCurrent(menu_window);
 
 
@@ -193,17 +196,10 @@ int main(int, char **) {
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             old_imgui_time = glfwGetTime();
             glfwSwapBuffers(menu_window);
-        }
 
-        // Things that need to be called on each loop for menu stuff
-        cacheFrame(); // only caches frame if user activates caching
-        updateAudio();
 
-        // Render Stuff
-        glfwMakeContextCurrent(render_window);
-        static bool draw_and_swap = false;
-        current_time = glfwGetTime();
-        if (current_time - old_refresh_time > 1 / screen_refresh_rate) {
+            // Render Stuff
+            glfwMakeContextCurrent(render_window);
 
             glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -215,33 +211,29 @@ int main(int, char **) {
             viewPortSize = (display_h < display_w) ? (display_h) : (display_w);
             glViewport((display_w - viewPortSize) / 2, (display_h - viewPortSize) / 2, viewPortSize, viewPortSize);
 
-            draw_and_swap = true;
-        }
-
-        renderSims();
-
-        if (draw_and_swap) {
-
             switch (current_renderer)
             {
-                case None:
-                    break;
+            case None:
+                break;
 
-                    // 2D
-                case Dim2:
-                    if (render_enabled)
-                        renderer_2d.drawScene();
-                    break;
+                // 2D
+            case Dim2:
+                if (render_enabled)
+                    renderer_2d.drawScene();
+                break;
 
-                case Dim3:
-                    break;
+            case Dim3:
+                break;
             }
 
-            old_refresh_time = glfwGetTime();
             glfwSwapBuffers(render_window);
 
-            draw_and_swap = false;
+            old_refresh_time = glfwGetTime();
         }
+
+        // Things that need to be called on each loop for menu stuff
+        cacheFrame(); // only caches frame if user activates caching
+        updateAudio();
     }
 
     // Imgui Cleanup

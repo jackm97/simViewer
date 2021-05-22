@@ -251,8 +251,10 @@ void renderSims() {
                     is_calc_frame = false;
                     if (future.get()) {
                         waiting_to_render = true;
-                        if (render_enabled)
+                        if (render_enabled) {
+                            glfwMakeContextCurrent(render_window);
                             renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
+                        }
                     }
                     iter++;
                 }
