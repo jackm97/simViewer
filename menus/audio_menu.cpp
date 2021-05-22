@@ -12,9 +12,10 @@
 
 std::string audio_filename = "";
 bool choosing_audio_file = false;
+bool is_audio_loaded = false;
 std::string audio_save_location = "";
 bool choosing_save_location = false;
-bool is_audio_loaded = false;
+bool is_save_location_valid = false;
 
 AudioFile<float> audio_file;
 AudioFile<float>::AudioBuffer buffer(2);
@@ -49,27 +50,8 @@ void doAudioMenu()
     if (!is_updating && !is_animating && !next_frame && audioFileDialog.Display("ChooseFileDlgKey")) {
         // action if OK
         if (audioFileDialog.IsOk()) {
-            if (choosing_audio_file)
+            if (choosing_audio_file) {
                 audio_filename = audioFileDialog.GetFilePathName();
-            if (choosing_save_location)
-                audio_save_location = audioFileDialog.GetFilePathName();
-        }
-
-        // close
-        audioFileDialog.Close();
-    }
-
-
-    if ( ImGui::Begin("Audio") && !choosing_audio_file && !choosing_save_location)
-    {
-        ImGui::Checkbox("Generate Sound?", &do_sound);
-        if (do_sound) {
-            if (ImGui::Button("Audio File")) {
-                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", ".");
-                choosing_audio_file = true;
-            }
-            ImGui::TextUnformatted(audio_filename.c_str());
-            if (ImGui::Button("Load Audio")) {
                 is_audio_loaded = true;
                 audio_file_play.load(audio_filename);
                 float min_signal = audio_file_play.samples[0][0];
@@ -91,7 +73,28 @@ void doAudioMenu()
                     s *= signal_amp;
                 }
             }
-            ImGui::InputFloat("Sound Amplitude", &sound_amp);
+            if (choosing_save_location) {
+                audio_save_location = audioFileDialog.GetFilePathName();
+                is_save_location_valid = true;
+            }
+        }
+
+        // close
+        audioFileDialog.Close();
+    }
+
+
+    if ( ImGui::Begin("Audio") && !choosing_audio_file && !choosing_save_location)
+    {
+        ImGui::Checkbox("Generate Sound?", &do_sound);
+        if (do_sound) {
+            if (ImGui::Button("Audio File")) {
+                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", ".");
+                choosing_audio_file = true;
+            }
+            ImGui::TextUnformatted(audio_filename.c_str());
+            if (is_audio_loaded)
+                ImGui::InputFloat("Sound Amplitude", &sound_amp);
         }
 
 
@@ -104,46 +107,46 @@ void doAudioMenu()
                 choosing_save_location = true;
             }
             ImGui::TextUnformatted(audio_save_location.c_str());
-            ImGui::InputFloat("Signal Amplification", &signal_amp);
-            if (ImGui::Button("Finish Sound"))
-            {
-                float min_signal = buffer[0][0];
-                float max_signal = buffer[0][0];
-                for (float & s : buffer[0]) {
-                    if (min_signal > s)
-                        min_signal = s;
-                    if (max_signal < s)
-                        max_signal = s;
-                }
-                for (float & s : buffer[1]) {
-                    if (min_signal > s)
-                        min_signal = s;
-                    if (max_signal < s)
-                        max_signal = s;
-                }
-                for (float & s : buffer[0]) {
-                    s = 2 * (s - min_signal)/(max_signal - min_signal) - 1;
-                    s *= signal_amp;
-                }
-                for (float & s : buffer[1]) {
-                    s = 2 * (s - min_signal)/(max_signal - min_signal) - 1;
-                    s *= signal_amp;
-                }
-                audio_file.setAudioBuffer( buffer );
-                audio_file.setBitDepth(24);
-                audio_file.setSampleRate(1 / lbm_solver->TimeStep() / (float) iter_per_frame );
-                audio_file.save(audio_save_location);
-                printf("%i\n", audio_file.getSampleRate());
-                printf("%zu,%zu\n", audio_file.samples[0].size(), audio_file.samples[1].size());
-                for (float & s : buffer[0]) {
-                    s /= signal_amp;
-                    s += 1;
-                    s = s / 2 * (max_signal - min_signal) + min_signal;
-                }
-                for (float & s : buffer[1]) {
-                    s /= signal_amp;
-                    s += 1;
-                    s = s / 2 * (max_signal - min_signal) + min_signal;
+            if (is_save_location_valid) {
+                ImGui::InputFloat("Signal Amplification", &signal_amp);
+                if (ImGui::Button("Finish Sound"))
+                {
+                    float min_signal = buffer[0][0];
+                    float max_signal = buffer[0][0];
+                    for (float& s : buffer[0]) {
+                        if (min_signal > s)
+                            min_signal = s;
+                        if (max_signal < s)
+                            max_signal = s;
+                    }
+                    for (float& s : buffer[1]) {
+                        if (min_signal > s)
+                            min_signal = s;
+                        if (max_signal < s)
+                            max_signal = s;
+                    }
+                    for (float& s : buffer[0]) {
+                        s = 2 * (s - min_signal) / (max_signal - min_signal) - 1;
+                        s *= signal_amp;
+                    }
+                    for (float& s : buffer[1]) {
+                        s = 2 * (s - min_signal) / (max_signal - min_signal) - 1;
+                        s *= signal_amp;
+                    }
+                    audio_file.setAudioBuffer(buffer);
+                    audio_file.setBitDepth(24);
+                    audio_file.setSampleRate(1 / lbm_solver->TimeStep() / (float)iter_per_frame);
+                    audio_file.save(audio_save_location);
+                    for (float& s : buffer[0]) {
+                        s /= signal_amp;
+                        s += 1;
+                        s = s / 2 * (max_signal - min_signal) + min_signal;
+                    }
+                    for (float& s : buffer[1]) {
+                        s /= signal_amp;
+                        s += 1;
+                        s = s / 2 * (max_signal - min_signal) + min_signal;
+                    }
                 }
             }
         }
@@ -171,13 +174,15 @@ void updateAudio(){
         int range = .005 * grid_size;
         // float ux = sound_amp * ( std::sin(w * LBMSolver->Time()) );
         float n_sample = audio_file_play.getSampleRate() * lbm_solver->Time();
-        if (n_sample < audio_file_play.samples[0].size()) {
+        if (n_sample < audio_file_play.samples[0].size() - 1) {
 //            if (forces.size() == 0)
 //                forces.push_back(jfs::Force());
 //            forces[0].pos[0] = .5 * grid_length;
 //            forces[0].pos[1] = .5 * grid_length;
 
-            float sample = audio_file_play.samples[0][n_sample];
+            float sample_down = audio_file_play.samples[0][(int)n_sample];
+            float sample_up = audio_file_play.samples[0][(int)n_sample + 1];
+            float sample = (n_sample - std::floor(n_sample)) * sample_up + (std::ceil(n_sample) - n_sample) * sample_down;
             float ux = sound_amp * sample * std::abs(std::cos(w * lbm_solver->Time()));
             float uy = -sound_amp * sample * std::sin(w * lbm_solver->Time());
 //            forces[0].force[0] = ux;
