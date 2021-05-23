@@ -134,7 +134,7 @@ bool LBMRender(void *imgPtr) {
         if (!failed_step && iter == (iter_per_frame - 1)) {
             next_frame = false;
             new_image = true;
-            if (render_enabled)
+            if (render_enabled && !view_density)
                 grid_smoke2d->updateSmoke(sources, lbm_solver->VelocityData());
         } else if (failed_step) {
             is_animating = false;
@@ -147,7 +147,6 @@ bool LBMRender(void *imgPtr) {
     }
     if (new_image) {
         if (!view_density) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
-        else { *(float **) imgPtr = lbm_solver->MappedRhoData(); }
     }
 
     while (iter == iter_per_frame - 1 && waiting_to_render)
