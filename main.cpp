@@ -188,7 +188,6 @@ int main(int, char **) {
             doMainWindow();
             doForceWindow();
             doSourceWindow();
-            doPressureWindow();
             doAudioMenu();
 
             ImGui::Render();
