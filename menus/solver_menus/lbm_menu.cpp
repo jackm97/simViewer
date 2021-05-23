@@ -79,13 +79,13 @@ void doLBMMenu()
 
             if ( ImGui::InputFloat2("Density Mapping", rhobounds) )
                 lbm_solver->SetDensityMapping(rhobounds[0], rhobounds[1]);
-            std::string current_min_max_rho = "Current min/max density: ";
+            /*std::string current_min_max_rho = "Current min/max density: ";
             float minmaxrho[2];
             lbm_solver->DensityExtrema(minmaxrho);
             current_min_max_rho += std::to_string(minmaxrho[0]);
             current_min_max_rho += "/";
             current_min_max_rho += std::to_string(minmaxrho[1]);
-            ImGui::TextUnformatted(current_min_max_rho.c_str());
+            ImGui::TextUnformatted(current_min_max_rho.c_str());*/
         }
     
 

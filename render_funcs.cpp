@@ -36,6 +36,9 @@ void doRendererUpdate() {
             renderer_2d.init();
             renderer_2d.getTexture("background")->genNewTexture(grid_size, grid_size);
             renderer_2d.setBounds(grid_length, grid_length);
+            renderer_2d.getTexture("background")->bind();
+            if (currentSolver == Lbm)
+                lbm_solver->RegisterRhoMapTexture(renderer_2d.getTexture("background")->ID_);
             break;
         case Dim3:
             break;
@@ -239,7 +242,6 @@ void renderSims() {
                 // 2D
             case Jssf:
             case JssfIter:
-            case Lbm:
                 if (waiting_to_render) {
                     if (max_fps == 0 || current_time - old_sim_time > 1 / max_fps) {
                         sim_fps = 1 / (current_time - old_sim_time);
@@ -254,6 +256,32 @@ void renderSims() {
                         if (render_enabled) {
                             glfwMakeContextCurrent(render_window);
                             renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
+                        }
+                    }
+                    iter++;
+                }
+                break;
+
+            case Lbm:
+                if (waiting_to_render) {
+                    if (max_fps == 0 || current_time - old_sim_time > 1 / max_fps) {
+                        sim_fps = 1 / (current_time - old_sim_time);
+                        old_sim_time = glfwGetTime();
+                        waiting_to_render = false;
+                    }
+                }
+                if (is_calc_frame && (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                    is_calc_frame = false;
+                    if (future.get()) {
+                        waiting_to_render = true;
+                        if (render_enabled) {
+                            glfwMakeContextCurrent(render_window);
+                            if (!view_density)
+                                renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
+                            else {
+                                renderer_2d.getTexture("background")->bind();
+                                lbm_solver->MapRhoData2Texture();
+                            }
                         }
                     }
                     iter++;
