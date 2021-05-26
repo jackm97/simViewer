@@ -139,6 +139,9 @@ add_executable(simViewer    main.cpp
                             ${IMGUI_SRC})
 target_link_libraries(simViewer PUBLIC ${SIMVIEWER_LIBS})
 
+#cache directory
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.cache)
+
 if(OpenMP_CXX_FOUND)
     add_definitions(-DUSE_OPENMP)
     target_link_libraries(simViewer PUBLIC OpenMP::OpenMP_CXX)
