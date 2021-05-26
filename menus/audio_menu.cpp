@@ -84,7 +84,7 @@ void doAudioMenu()
     }
 
 
-    if ( ImGui::Begin("Audio") && !choosing_audio_file && !choosing_save_location)
+    if (ImGui::Begin("Audio") && !choosing_audio_file && !choosing_save_location)
     {
         ImGui::Checkbox("Generate Sound?", &do_sound);
         if (do_sound) {
@@ -186,11 +186,9 @@ void updateAudio(){
                 float x = .5 * grid_length - .2 * grid_length * std::abs(std::cos(w * t));
                 int idx_y = y / lbm_solver->DeltaX();
                 int idx_x = x / lbm_solver->DeltaX();
-                if (i_vec.size() == 0 || (i_vec[i_vec.size() - 1] != idx_x || j_vec[j_vec.size() - 1] != idx_x))
-                {
-                    i_vec.push_back(idx_x);
-                    j_vec.push_back(idx_y);
-                    rho0_vec.push_back(rho_amp);
+                i_vec.push_back(idx_x);
+                j_vec.push_back(idx_y);
+                rho0_vec.push_back(rho_amp);
                 phi += .8;
             }
             lbm_solver->ForceMass(i_vec.data(), j_vec.data(), rho0_vec.data(), rho0_vec.size());
