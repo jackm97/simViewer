@@ -12,6 +12,7 @@ void doGridMenu()
     static bool updateGrid = false;
     static int fps_tmp = (int) max_fps;
     static std::future<void> future;
+    static int tmp_grid_size = grid_size;
 
     // update the grid
     if (updateGrid && !is_calc_frame)
@@ -20,6 +21,7 @@ void doGridMenu()
         updateSolver = true;
         updateGrid = false;
         update_renderer = true;
+        grid_size = tmp_grid_size;
     }
     // if (updateGrid)
     // {
@@ -31,7 +33,7 @@ void doGridMenu()
     // parts of the program are updating
     if (!is_updating)
     {
-        isChanged |= ImGui::InputInt("Grid Size (>0)", (int*) &grid_size);
+        isChanged |= ImGui::InputInt("Grid Size (>0)", (int*) &tmp_grid_size);
         isChanged |= ImGui::InputFloat("Grid Length (>0)", &grid_length);
         isChanged |= ImGui::InputInt("Maximum Simulation FPS(0 is uncapped)", &fps_tmp);
         isChanged |= ImGui::InputInt("Iterations Per Frame", &(iter_per_frame));

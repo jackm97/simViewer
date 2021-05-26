@@ -167,6 +167,55 @@ void updateAudio(){
     if (currentSolver != Lbm)
         return;
 
+    static int prev_grid_size = 0;
+
+    static std::vector<int> head_i, head_j;
+    static std::vector<float> head_rho;
+    if (prev_grid_size != grid_size) {
+        head_i.clear();
+        head_j.clear();
+        head_rho.clear();
+        float head_depth = .178;
+        int min_head = (int)((.5 * grid_length - head_depth / 2) / grid_length * (float)grid_size);
+        int max_head = (int)((.5 * grid_length + head_depth / 2) / grid_length * (float)grid_size);
+        for (int i = min_head; i <= max_head; i++) {
+            for (int j = .5*grid_size - (i - min_head) / 2; j <= .5*grid_size + (i - min_head) / 2; j++) {
+                head_i.push_back(i);
+                head_j.push_back(j);
+                head_rho.push_back(lbm_solver->Rho0());
+            }
+        }
+    }
+
+    static std::vector<int> border_i, border_j;
+    static std::vector<float> border_rho;
+    if (prev_grid_size != grid_size) {
+        border_i.clear();
+        border_j.clear();
+        border_rho.clear();
+        for (int i = 1; i < 1 + .1 * grid_size; i++) {
+            for (int j = 1; j < grid_size - 2; j++) {
+                border_i.push_back(i);
+                border_j.push_back(j);
+                border_rho.push_back(lbm_solver->Rho0());
+                border_i.push_back(j);
+                border_j.push_back(i);
+                border_rho.push_back(lbm_solver->Rho0());
+            }
+        }
+        for (int i = (1 - .1) * grid_size; i < grid_size; i++) {
+            for (int j = 1; j < grid_size - 2; j++) {
+                border_i.push_back(i);
+                border_j.push_back(j);
+                border_rho.push_back(lbm_solver->Rho0());
+                border_i.push_back(j);
+                border_j.push_back(i);
+                border_rho.push_back(lbm_solver->Rho0());
+            }
+        }
+        prev_grid_size = grid_size;
+    }
+
     float Hz = 1.f/10.f;
     float w = 2 * (float) M_PI * Hz;
     std::vector<int> i_vec, j_vec;
@@ -193,20 +242,8 @@ void updateAudio(){
             }
             lbm_solver->ForceMass(i_vec.data(), j_vec.data(), rho0_vec.data(), rho0_vec.size());
 
-            i_vec.clear();
-            j_vec.clear();
-            rho0_vec.clear();
-            float head_depth = .178;
-            int min_head = (int)((.5 * grid_length - head_depth / 2) / grid_length * (float)grid_size);
-            int max_head = (int)((.5 * grid_length + head_depth / 2) / grid_length * (float)grid_size);
-            for (int i = min_head; i <= max_head; i++) {
-                for (int j = min_head; j <= max_head; j++) {
-                    i_vec.push_back(i);
-                    j_vec.push_back(j);
-                    rho0_vec.push_back(lbm_solver->Rho0());
-                }
-            }
-            lbm_solver->ForceMass(i_vec.data(), j_vec.data(), rho0_vec.data(), rho0_vec.size(), head_damp);
+            lbm_solver->ForceMass(head_i.data(), head_j.data(), head_rho.data(), head_rho.size(), head_damp);
+            lbm_solver->ForceMass(border_i.data(), border_j.data(), border_rho.data(), border_rho.size(), .05);
         }
     }
 
