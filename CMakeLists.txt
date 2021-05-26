@@ -52,7 +52,6 @@ endif()
 #########################IMGUI##########################
 set(IMGUI_PATH ${PROJECT_SOURCE_DIR}/extern/imgui)
 set(IMGUI_BACKENDS_PATH ${IMGUI_PATH}/backends)
-set(IMGUI_FONTS_PATH ${IMGUI_PATH}/misc/fonts)
 include_directories(${IMGUI_PATH})
 set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
                 ${IMGUI_PATH}/imgui_draw.cpp 
@@ -63,10 +62,6 @@ set(IMGUI_SRC   ${IMGUI_PATH}/imgui.cpp
                 ${PROJECT_SOURCE_DIR}/extern/ImGuiFileDialog/ImGuiFileDialog.cpp)
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-# put fonts above binary directory
-file(COPY ${IMGUI_FONTS_PATH} DESTINATION ${CMAKE_BINARY_DIR})
-#cache directory
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.cache)
 #########################IMGUI##########################
 
 #########################OPENVDB########################

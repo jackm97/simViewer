@@ -150,7 +150,6 @@ int main(int, char **) {
     // High-DPI
     ImGuiStyle &style = ImGui::GetStyle();
     style.ScaleAllSizes(1.5);
-    io.Fonts->AddFontFromFileTTF("../fonts/Cousine-Regular.ttf", 18.0f, nullptr, nullptr);
 
 
     // Initialize GLR library
