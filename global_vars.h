@@ -32,7 +32,6 @@ extern float grid_length; // grid length
 extern float max_fps; // max sim_fps, if 0, uncapped
 extern const float screen_refresh_rate; // to limit load on GPU
 extern float old_sim_time;
-extern float old_imgui_time;
 extern float old_refresh_time;
 extern float current_time;
 

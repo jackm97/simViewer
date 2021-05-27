@@ -40,7 +40,6 @@ float grid_length = 1.; // grid length
 float max_fps = 60; // max sim_fps, if 0, uncapped
 const float screen_refresh_rate = 144; // to limit load on GPU
 float old_sim_time = 0;
-float old_imgui_time = 0;
 float old_refresh_time = 0;
 float current_time = 0;
 
@@ -192,7 +191,6 @@ int main(int, char **) {
             ImGui::Render();
 
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            old_imgui_time = glfwGetTime();
             glfwSwapBuffers(menu_window);
 
 

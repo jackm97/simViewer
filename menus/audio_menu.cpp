@@ -20,6 +20,7 @@ AudioFile<float>::AudioBuffer buffer(2);
 std::vector<float> rho_list_l;
 std::vector<float> rho_list_r;
 float head_damp = 1.f;
+float border_damp = .05f;
 
 AudioFile<float> audio_file_play;
 int n_sample = 0;
@@ -97,8 +98,10 @@ void doAudioMenu()
                 ImGui::InputFloat("Sound Amplitude", &sound_amp);
         }
 
-        if (do_sound && is_audio_loaded)
+        if (do_sound && is_audio_loaded) {
             ImGui::InputFloat("Head Damp", &head_damp);
+            ImGui::InputFloat("Border Damp", &border_damp);
+        }
 
 
         ImGui::Checkbox("Save Sound?", &save_sound);
@@ -169,9 +172,12 @@ void updateAudio(){
 
     static int prev_grid_size = 0;
 
-    static std::vector<int> head_i, head_j;
-    static std::vector<float> head_rho;
+    static std::vector<int> head_i, head_j, head_u_i, head_u_j;
+    static std::vector<float> head_rho, head_u;
     if (prev_grid_size != grid_size) {
+        head_u_i.clear();
+        head_u_j.clear();
+        head_u.clear();
         head_i.clear();
         head_j.clear();
         head_rho.clear();
@@ -183,6 +189,11 @@ void updateAudio(){
                 head_i.push_back(i);
                 head_j.push_back(j);
                 head_rho.push_back(lbm_solver->Rho0());
+                if (j == .5*grid_size - (i - min_head) / 2 || j == .5*grid_size + (i - min_head) / 2) {
+                    head_u_i.push_back(i);
+                    head_u_j.push_back(j);
+                    head_u.push_back(0);
+                }
             }
         }
     }
@@ -220,7 +231,7 @@ void updateAudio(){
     float w = 2 * (float) M_PI * Hz;
     std::vector<int> i_vec, j_vec;
     std::vector<float> rho0_vec;
-    if (is_audio_loaded && do_sound && (is_animating || next_frame) && !is_calc_frame) {
+    if (is_audio_loaded && do_sound && !is_updating && (is_animating || next_frame) && !is_calc_frame) {
         if (n_sample < audio_file_play.samples[0].size() - 1) {
             float t = (float)n_sample / (float)audio_file_play.getSampleRate();
             float phi = .2;
@@ -242,12 +253,10 @@ void updateAudio(){
             }
             lbm_solver->ForceMass(i_vec.data(), j_vec.data(), rho0_vec.data(), rho0_vec.size());
 
+            lbm_solver->ForceVelocity(head_u_i.data(), head_u_j.data(), head_u.data(), head_u.data(), head_u.size());
             lbm_solver->ForceMass(head_i.data(), head_j.data(), head_rho.data(), head_rho.size(), head_damp);
-            lbm_solver->ForceMass(border_i.data(), border_j.data(), border_rho.data(), border_rho.size(), .05);
+            lbm_solver->ForceMass(border_i.data(), border_j.data(), border_rho.data(), border_rho.size(), border_damp);
         }
-    }
-
-    if (is_audio_loaded && (is_animating || next_frame) && !is_calc_frame) {
     }
 
     if (is_audio_loaded && iter == (iter_per_frame - 1) && save_sound)
