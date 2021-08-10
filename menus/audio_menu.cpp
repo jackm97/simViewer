@@ -8,7 +8,7 @@
 
 #include <string>
 
-std::string audio_filename = "";
+std::string audio_filename = "../sounds/582417__gertraut-hecher__nordic-flute.wav";
 bool choosing_audio_file = false;
 bool is_audio_loaded = false;
 std::string audio_save_location = "";
@@ -35,6 +35,31 @@ bool is_saving = false;
 
 int current_sample_count = 0;
 
+void
+LoadAudioFile()
+{
+    is_audio_loaded = true;
+    audio_file_play.load(audio_filename);
+    float min_signal = audio_file_play.samples[0][0];
+    float max_signal = audio_file_play.samples[0][0];
+    float mean_signal = 0;
+    for (float& s : audio_file_play.samples[0])
+    {
+        if (min_signal > s)
+            min_signal = s;
+        if (max_signal < s)
+            max_signal = s;
+        mean_signal += s;
+    }
+    mean_signal /= audio_file_play.samples[0].size();
+
+    for (float& s : audio_file_play.samples[0])
+    {
+        s = (s - mean_signal) / (max_signal - min_signal);
+        s *= signal_amp;
+    }
+}
+
 void doAudioMenu()
 {
 
@@ -47,32 +72,20 @@ void doAudioMenu()
         choosing_save_location = false;
     }
 
+    static bool first_call = true;
+    if (first_call) {
+        choosing_audio_file = true;
+        LoadAudioFile();
+        first_call = false;
+    }
+
     // display
     if (!is_updating && !is_animating && !next_frame && audioFileDialog.Display("ChooseFileDlgKey")) {
         // action if OK
         if (audioFileDialog.IsOk()) {
             if (choosing_audio_file) {
                 audio_filename = audioFileDialog.GetFilePathName();
-                is_audio_loaded = true;
-                audio_file_play.load(audio_filename);
-                float min_signal = audio_file_play.samples[0][0];
-                float max_signal = audio_file_play.samples[0][0];
-                float mean_signal = 0;
-                for (float& s : audio_file_play.samples[0])
-                {
-                    if (min_signal > s)
-                        min_signal = s;
-                    if (max_signal < s)
-                        max_signal = s;
-                    mean_signal += s;
-                }
-                mean_signal /= audio_file_play.samples[0].size();
-
-                for (float& s : audio_file_play.samples[0])
-                {
-                    s = (s - mean_signal) / (max_signal - min_signal);
-                    s *= signal_amp;
-                }
+                LoadAudioFile();
             }
             if (choosing_save_location) {
                 audio_save_location = audioFileDialog.GetFilePathName();
@@ -90,7 +103,7 @@ void doAudioMenu()
         ImGui::Checkbox("Generate Sound?", &do_sound);
         if (do_sound) {
             if (ImGui::Button("Audio File")) {
-                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", ".");
+                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", "../sounds/");
                 choosing_audio_file = true;
             }
             ImGui::TextUnformatted(audio_filename.c_str());
@@ -109,7 +122,7 @@ void doAudioMenu()
         if (save_sound && is_audio_loaded)
         {
             if (ImGui::Button("Save Location")) {
-                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", ".");
+                audioFileDialog.OpenDialog("ChooseFileDlgKey", "Choose a File", ".wav", "../.cache/");
                 choosing_save_location = true;
             }
             ImGui::TextUnformatted(audio_save_location.c_str());
