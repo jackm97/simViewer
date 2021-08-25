@@ -20,6 +20,7 @@ set(PATH_TO_GLR ${PROJECT_SOURCE_DIR}/extern/GLR/)
 #   EXTERNAL LIB PATHS
 set(GLM_PATH ${PATH_TO_GLR}/extern/glm)
 set(EIGEN_PATH ${PROJECT_SOURCE_DIR}/extern/GLR/extern/eigen)
+set(GLAD_PATH ${PROJECT_SOURCE_DIR}/extern/glad)
 
 add_definitions(-DGLRENDER_STATIC)
 add_subdirectory(${PATH_TO_GLR})
@@ -108,8 +109,7 @@ find_package (Threads REQUIRED)
 #########################THREADS########################
 
 #########################GLAD########################
-set(GLAD_SRC_NAME glad.c) 
-set(GLAD_PATH ${PROJECT_SOURCE_DIR}/extern/glad)
+set(GLAD_SRC_NAME glad.c)
 include_directories(${GLAD_PATH}/include)
 add_library(glad STATIC ${GLAD_PATH}/src/${GLAD_SRC_NAME})
 target_link_libraries(glad PRIVATE ${CMAKE_DL_LIBS})
