@@ -147,6 +147,7 @@ bool LBMRender(void *imgPtr) {
     }
     if (new_image) {
         if (!view_density) { *(float **) imgPtr = grid_smoke2d->smokeData(); }
+        else {*(float **) imgPtr = lbm_solver->MappedRhoData();}
     }
 
     while (iter == iter_per_frame - 1 && waiting_to_render)
@@ -275,7 +276,7 @@ void renderSims() {
                         waiting_to_render = true;
                         if (render_enabled) {
                             glfwMakeContextCurrent(render_window);
-                            if (!view_density)
+                            if (true)
                                 renderer_2d.getTexture("background")->loadPixels(GL_RGB, GL_FLOAT, img);
                             else {
                                 renderer_2d.getTexture("background")->bind();
