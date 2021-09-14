@@ -8,8 +8,9 @@ Simulation Viewer for my Master's Research
 </p>
 
 The application is a GUI application that allows users to experiment on the fly with different fluid simulation 
-parameters. Two methods are currently implemented, Jos Stam's Stable Fluids [1] and a generic Lattice Boltzmann 
-Method [2]. It supports 2D simulation and visualization of fluid 
+parameters. Two methods are currently implemented, Jos Stam's Stable Fluids [[1]](#References) and a generic Lattice 
+Boltzmann 
+Method [[2]](#References). It supports 2D simulation and visualization of fluid 
 flow and 3D simulation without visualization of fluid flow for the NS solver. It supports 2D simulation and visualization of 
 fluid flow and density for the Lattice Boltzmann solver. The Lattice Boltzmann Method is implemented in CUDA so a 
 CUDA capable GPU is required to run the software.
@@ -59,4 +60,10 @@ cd bin
 
 If all goes well you should see the following
 ![gui-screenshot](./images/simviewer_screenshot.png)
+
+## References
+[1] Stam, J. (1999, July). Stable fluids. In Proceedings of the 26th annual conference on Computer graphics and 
+interactive techniques (pp. 121-128).
+
+[2] Li, W., Chen, Y., Desbrun, M., Zheng, C., & Liu, X. (2020). Fast and scalable turbulent flow simulation with two-way coupling. ACM Transactions on Graphics, 39(4), Art-No.
 
